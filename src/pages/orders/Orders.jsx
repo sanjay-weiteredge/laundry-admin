@@ -63,6 +63,7 @@ const Orders = () => {
       isMounted = false;
     };
   }, []);
+  console.log(orders)
 
   const storeOptions = useMemo(() => {
     const uniqueStores = new Set();
@@ -107,38 +108,35 @@ const Orders = () => {
   };
 
   const columns = [
-    { key: 'orderId', header: 'Order ID', field: 'orderId' },
+    { key: 'orderId', header: 'Order ID', field: 'id' },
     {
       key: 'serviceName',
       header: 'Service',
-      render: (_, row) => row.serviceName || 'Unknown service',
+      render: (_, row) => row.service.name || 'Unknown service',
     },
     {
       key: 'storeName',
       header: 'Store',
-      render: (_, row) => row.storeName || 'Unknown store',
+      render: (_, row) => row.store.name || 'Unknown store',
     },
     {
       key: 'pickupSlot',
       header: 'Pickup Window',
-      render: (_, row) => formatPickupWindow(row.pickupSlot),
+      render: (_, row) => formatPickupWindow(row.
+pickup_slot_end),
     },
     {
       key: 'status',
       header: 'Status',
       render: (value, row) => {
-        const meta = statusMeta[row.status];
+        const meta = statusMeta[row.
+order_status];
         return (
           <span className={`status-badge ${meta?.tone || ''}`}>
             {meta?.label || row.status || 'Unknown'}
           </span>
         );
       },
-    },
-    {
-      key: 'createdAt',
-      header: 'Placed',
-      render: (_, row) => formatDate(row.createdAt),
     },
     {
       key: 'actions',

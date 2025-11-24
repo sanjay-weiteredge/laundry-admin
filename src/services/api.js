@@ -1,4 +1,4 @@
-const API_BASE_URL = 'http://13.51.13.251:8000/api';
+const API_BASE_URL = 'https://backend.thelaundryguyz.com/api';
 
 // Helper function to get auth token from localStorage
 const getAuthToken = () => {
