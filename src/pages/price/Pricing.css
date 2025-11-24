@@ -1,0 +1,248 @@
+.pricing-page {
+  padding: 0;
+}
+
+.pricing-page__header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 24px;
+}
+
+.pricing-page__header p {
+  margin: 0;
+  color: #666;
+  font-size: 0.85rem;
+  font-weight: 500;
+}
+
+.primary-btn {
+  padding: 12px 24px;
+  background: var(--color-primary);
+  color: #ffffff;
+  border: none;
+  border-radius: 8px;
+  font-size: 0.95rem;
+  font-weight: 600;
+  cursor: pointer;
+  transition: all 0.2s ease;
+  box-shadow: 0 2px 8px rgba(240, 131, 131, 0.25);
+}
+
+.primary-btn:hover {
+  background: #e96e6e;
+  box-shadow: 0 4px 12px rgba(240, 131, 131, 0.35);
+}
+
+.pricing-card {
+  background: #ffffff;
+  border-radius: 12px;
+  padding: 24px;
+  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
+}
+
+.pricing-card__header {
+  display: flex;
+  align-items: center;
+  gap: 16px;
+  margin-bottom: 24px;
+  padding-bottom: 20px;
+  border-bottom: 1px solid #e5e5e5;
+}
+
+.pricing-card__icon {
+  width: 48px;
+  height: 48px;
+  border-radius: 10px;
+  background: rgba(240, 131, 131, 0.1);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: var(--color-primary);
+  flex-shrink: 0;
+}
+
+.pricing-card__header p {
+  margin: 0;
+  color: #666;
+  font-size: 0.9rem;
+}
+
+.pricing-card__header strong {
+  font-size: 1.1rem;
+  color: #000;
+}
+
+.table-pagination {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-top: 24px;
+  padding-top: 20px;
+  border-top: 1px solid #e5e5e5;
+  flex-wrap: wrap;
+  gap: 16px;
+}
+
+.table-pagination__buttons {
+  display: flex;
+  gap: 8px;
+}
+
+.pagination-btn {
+  padding: 8px 16px;
+  border: 1px solid #e5e5e5;
+  border-radius: 8px;
+  background: #ffffff;
+  color: #333;
+  font-size: 0.9rem;
+  font-weight: 500;
+  cursor: pointer;
+  transition: all 0.2s ease;
+  min-width: 80px;
+}
+
+.pagination-btn:hover {
+  background: #f9f9f9;
+  border-color: var(--color-primary);
+  color: var(--color-primary);
+}
+
+.pagination-btn:active {
+  background: rgba(240, 131, 131, 0.1);
+}
+
+.icon-button {
+  background: transparent;
+  border: none;
+  padding: 4px 8px;
+  cursor: pointer;
+  color: #666;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  border-radius: 4px;
+  transition: all 0.2s ease;
+}
+
+.icon-button:hover {
+  background: rgba(240, 131, 131, 0.1);
+  color: var(--color-primary);
+}
+
+/* Modal Form Styles */
+.modal-form {
+  display: flex;
+  flex-direction: column;
+  gap: 20px;
+}
+
+.modal-form__field {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+.modal-form__label {
+  font-size: 0.95rem;
+  font-weight: 500;
+  color: #333;
+}
+
+.modal-form__label .required {
+  color: #dc2626;
+}
+
+.modal-form__input {
+  padding: 10px 16px;
+  border: 1px solid #e5e5e5;
+  border-radius: 8px;
+  font-size: 0.95rem;
+  transition: border-color 0.2s ease, box-shadow 0.2s ease;
+  font-family: inherit;
+}
+
+.modal-form__input:focus {
+  outline: none;
+  border-color: var(--color-primary);
+  box-shadow: 0 0 0 3px rgba(240, 131, 131, 0.15);
+}
+
+.modal-form__actions {
+  display: flex;
+  gap: 12px;
+  justify-content: flex-end;
+  margin-top: 8px;
+}
+
+.modal-form__cancel-btn {
+  padding: 10px 20px;
+  border: 1px solid #e5e5e5;
+  border-radius: 8px;
+  background: #ffffff;
+  color: #333;
+  font-size: 0.95rem;
+  font-weight: 500;
+  cursor: pointer;
+  transition: all 0.2s ease;
+}
+
+.modal-form__cancel-btn:hover {
+  background: #f9f9f9;
+  border-color: #d0d0d0;
+}
+
+.modal-form__submit-btn {
+  padding: 10px 20px;
+  border: none;
+  border-radius: 8px;
+  background: var(--color-primary);
+  color: #ffffff;
+  font-size: 0.95rem;
+  font-weight: 600;
+  cursor: pointer;
+  transition: all 0.2s ease;
+  box-shadow: 0 2px 8px rgba(240, 131, 131, 0.25);
+}
+
+.modal-form__submit-btn:hover {
+  background: #e96e6e;
+  box-shadow: 0 4px 12px rgba(240, 131, 131, 0.35);
+}
+
+/* Responsive */
+@media (max-width: 768px) {
+  .pricing-page__header {
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 16px;
+  }
+
+  .primary-btn {
+    width: 100%;
+  }
+
+  .table-pagination {
+    flex-direction: column;
+    align-items: flex-start;
+  }
+
+  .table-pagination__buttons {
+    width: 100%;
+    justify-content: space-between;
+  }
+
+  .pagination-btn {
+    flex: 1;
+  }
+
+  .modal-form__actions {
+    flex-direction: column-reverse;
+  }
+
+  .modal-form__cancel-btn,
+  .modal-form__submit-btn {
+    width: 100%;
+  }
+}
+

@@ -1,0 +1,137 @@
+.users-page {
+  padding: 0;
+}
+
+.users-page__header {
+  margin-bottom: 24px;
+}
+
+.users-page__header p:first-child {
+  margin: 0 0 8px 0;
+  color: #666;
+  font-size: 0.85rem;
+  font-weight: 500;
+}
+
+.users-page__header p:last-child {
+  margin: 0;
+  color: #666;
+  font-size: 0.95rem;
+}
+
+.users-page__email {
+  color: var(--color-primary);
+  text-decoration: none;
+  transition: color 0.2s ease;
+}
+
+.users-page__email:hover {
+  color: #e96e6e;
+  text-decoration: underline;
+}
+
+.users-card {
+  background: #ffffff;
+  border-radius: 12px;
+  padding: 24px;
+  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
+}
+
+.users-card__toolbar {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 24px;
+  flex-wrap: wrap;
+  gap: 16px;
+}
+
+.users-card__search-wrapper {
+  flex: 1;
+  min-width: 250px;
+}
+
+.users-card__search {
+  width: 100%;
+  padding: 10px 16px;
+  border: 1px solid #e5e5e5;
+  border-radius: 8px;
+  font-size: 0.95rem;
+  transition: border-color 0.2s ease, box-shadow 0.2s ease;
+}
+
+.users-card__search:focus {
+  outline: none;
+  border-color: var(--color-primary);
+  box-shadow: 0 0 0 3px rgba(240, 131, 131, 0.15);
+}
+
+.users-card__toolbar .text-muted {
+  font-size: 0.9rem;
+  color: #666;
+  white-space: nowrap;
+}
+
+.users-card__pagination {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin-top: 24px;
+  padding-top: 20px;
+  border-top: 1px solid #e5e5e5;
+  flex-wrap: wrap;
+  gap: 16px;
+}
+
+.pagination-btn {
+  padding: 8px 16px;
+  border: 1px solid #e5e5e5;
+  border-radius: 8px;
+  background: #ffffff;
+  color: #333;
+  font-size: 0.9rem;
+  font-weight: 500;
+  cursor: pointer;
+  transition: all 0.2s ease;
+  min-width: 80px;
+}
+
+.pagination-btn:hover:not(:disabled) {
+  background: #f9f9f9;
+  border-color: var(--color-primary);
+  color: var(--color-primary);
+}
+
+.pagination-btn:disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
+}
+
+/* Responsive */
+@media (max-width: 768px) {
+  .users-card__toolbar {
+    flex-direction: column;
+    align-items: stretch;
+  }
+
+  .users-card__search-wrapper {
+    width: 100%;
+    min-width: auto;
+  }
+
+  .users-card__toolbar .text-muted {
+    text-align: center;
+    white-space: normal;
+  }
+
+  .users-card__pagination {
+    flex-direction: column;
+    align-items: center;
+    gap: 12px;
+  }
+
+  .users-card__pagination .text-muted {
+    order: -1;
+  }
+}
+
