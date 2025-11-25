@@ -1,5 +1,6 @@
 import { useEffect, useMemo, useState } from 'react';
 import Table from '../../components/ui/Table';
+import Pagination from '../../components/ui/Pagination';
 import { adminAPI } from '../../services/api';
 import './Orders.css';
 
@@ -31,6 +32,8 @@ const Orders = () => {
   const [storeFilter, setStoreFilter] = useState('all');
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState('');
+  const [currentPage, setCurrentPage] = useState(1);
+  const itemsPerPage = 5;
 
   useEffect(() => {
     let isMounted = true;
@@ -63,7 +66,6 @@ const Orders = () => {
       isMounted = false;
     };
   }, []);
-  console.log(orders)
 
   const storeOptions = useMemo(() => {
     const uniqueStores = new Set();
@@ -94,6 +96,20 @@ const Orders = () => {
     setSearch('');
     setStatusFilter('all');
     setStoreFilter('all');
+    setCurrentPage(1);
+  };
+
+  // Paginate filtered orders
+  const paginatedOrders = useMemo(() => {
+    const startIndex = (currentPage - 1) * itemsPerPage;
+    const endIndex = startIndex + itemsPerPage;
+    return filteredOrders.slice(startIndex, endIndex);
+  }, [filteredOrders, currentPage, itemsPerPage]);
+
+  const totalPages = Math.ceil(filteredOrders.length / itemsPerPage);
+
+  const handlePageChange = (newPage) => {
+    setCurrentPage(newPage);
   };
 
   const formatDate = (value) => (value ? new Date(value).toLocaleString() : '—');
@@ -138,15 +154,15 @@ order_status];
         );
       },
     },
-    {
-      key: 'actions',
-      header: 'Actions',
-      render: () => (
-        <button type="button" className="icon-button" aria-label="More actions">
-          <DotsIcon />
-        </button>
-      ),
-    },
+    // {
+    //   key: 'actions',
+    //   header: 'Actions',
+    //   render: () => (
+    //     <button type="button" className="icon-button" aria-label="More actions">
+    //       <DotsIcon />
+    //     </button>
+    //   ),
+    // },
   ];
 
   return (
@@ -161,13 +177,19 @@ order_status];
               type="search"
               placeholder="Search by Order ID, Service or Store..."
               value={search}
-              onChange={(event) => setSearch(event.target.value)}
+              onChange={(event) => {
+                setSearch(event.target.value);
+                setCurrentPage(1);
+              }}
               aria-label="Search orders"
             />
           </div>
           <select
             value={statusFilter}
-            onChange={(event) => setStatusFilter(event.target.value)}
+            onChange={(event) => {
+              setStatusFilter(event.target.value);
+              setCurrentPage(1);
+            }}
             aria-label="Filter by status"
           >
             <option value="all">All Statuses</option>
@@ -179,7 +201,10 @@ order_status];
           </select>
           <select
             value={storeFilter}
-            onChange={(event) => setStoreFilter(event.target.value)}
+            onChange={(event) => {
+              setStoreFilter(event.target.value);
+              setCurrentPage(1);
+            }}
             aria-label="Filter by store"
           >
             <option value="all">All Stores</option>
@@ -202,19 +227,17 @@ order_status];
         </div>
         <Table
           columns={columns}
-          data={filteredOrders}
+          data={paginatedOrders}
           striped
           emptyMessage={loading ? 'Fetching orders...' : 'No orders found'}
         />
-        <div className="orders-card__pagination">
-          <button type="button" className="pagination-btn" disabled>
-            Previous
-          </button>
-          <span className="text-muted">Showing {filteredOrders.length} orders</span>
-          <button type="button" className="pagination-btn" disabled>
-            Next
-          </button>
-        </div>
+        <Pagination
+          currentPage={currentPage}
+          totalPages={totalPages}
+          totalItems={filteredOrders.length}
+          itemsPerPage={itemsPerPage}
+          onPageChange={handlePageChange}
+        />
       </div>
     </section>
   );

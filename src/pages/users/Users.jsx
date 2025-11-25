@@ -1,5 +1,6 @@
 import { useEffect, useMemo, useState } from 'react';
 import Table from '../../components/ui/Table';
+import Pagination from '../../components/ui/Pagination';
 import { adminAPI } from '../../services/api';
 import './Users.css';
 
@@ -9,6 +10,8 @@ const Users = () => {
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState('');
   const [page, setPage] = useState(1);
+  const [currentPage, setCurrentPage] = useState(1);
+  const itemsPerPage = 5;
   const [pagination, setPagination] = useState({
     page: 1,
     limit: 10,
@@ -63,13 +66,17 @@ const Users = () => {
     totalOrders: Number(customer.totalOrders) || 0,
   }));
 
-  const handlePageChange = (direction) => {
-    const nextPage =
-      direction === 'next' ? page + 1 : direction === 'prev' ? page - 1 : page;
+  // Paginate filtered customers (client-side pagination)
+  const paginatedCustomers = useMemo(() => {
+    const startIndex = (currentPage - 1) * itemsPerPage;
+    const endIndex = startIndex + itemsPerPage;
+    return tableData.slice(startIndex, endIndex);
+  }, [tableData, currentPage, itemsPerPage]);
 
-    if (nextPage >= 1 && nextPage <= pagination.totalPages) {
-      fetchUsers(nextPage);
-    }
+  const totalPages = Math.ceil(tableData.length / itemsPerPage);
+
+  const handlePageChange = (newPage) => {
+    setCurrentPage(newPage);
   };
 
   const columns = [
@@ -142,7 +149,10 @@ const Users = () => {
               placeholder="Search customers..."
               aria-label="Search customers"
               className="users-card__search"
-              onChange={(event) => setSearchTerm(event.target.value)}
+              onChange={(event) => {
+                setSearchTerm(event.target.value);
+                setCurrentPage(1);
+              }}
             />
           </div>
           <span className="text-muted">
@@ -152,32 +162,18 @@ const Users = () => {
 
         <Table
           columns={columns}
-          data={tableData}
+          data={paginatedCustomers}
           striped
           emptyMessage="No customers found"
         />
 
-        <div className="users-card__pagination">
-          <button
-            type="button"
-            className="pagination-btn"
-            onClick={() => handlePageChange('prev')}
-            disabled={page <= 1}
-          >
-            Previous
-          </button>
-          <span className="text-muted">
-            Page {page} of {pagination.totalPages}
-          </span>
-          <button
-            type="button"
-            className="pagination-btn"
-            onClick={() => handlePageChange('next')}
-            disabled={page >= pagination.totalPages}
-          >
-            Next
-          </button>
-        </div>
+        <Pagination
+          currentPage={currentPage}
+          totalPages={totalPages}
+          totalItems={tableData.length}
+          itemsPerPage={itemsPerPage}
+          onPageChange={handlePageChange}
+        />
       </div>
     </section>
   );

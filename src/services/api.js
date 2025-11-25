@@ -1,4 +1,6 @@
 const API_BASE_URL = 'https://backend.thelaundryguyz.com/api';
+// const API_BASE_URL = 'http://localhost:8000/api';
+
 
 // Helper function to get auth token from localStorage
 const getAuthToken = () => {
@@ -166,6 +168,26 @@ export const adminAPI = {
 
   deleteStore: async (storeId) => {
     return await apiRequest(`/stores/admin/stores/${storeId}`, {
+      method: 'DELETE',
+    });
+  },
+
+  // Services
+  getAllServices: async () => {
+    return await apiRequest('/services/all', {
+      method: 'GET',
+    });
+  },
+
+  createService: async (payload) => {
+    return await apiRequest('/services/create', {
+      method: 'POST',
+      body: JSON.stringify(payload),
+    });
+  },
+
+  deleteService: async (serviceId) => {
+    return await apiRequest(`/services/delete/${serviceId}`, {
       method: 'DELETE',
     });
   },

@@ -168,6 +168,12 @@
   box-shadow: 0 0 0 3px rgba(240, 131, 131, 0.15);
 }
 
+textarea.modal-form__input {
+  resize: vertical;
+  min-height: 80px;
+  font-family: inherit;
+}
+
 .modal-form__actions {
   display: flex;
   gap: 12px;

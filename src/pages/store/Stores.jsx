@@ -1,6 +1,7 @@
 import { useCallback, useEffect, useMemo, useState } from 'react';
 import Table from '../../components/ui/Table';
 import Modal from '../../components/ui/Modal';
+import Pagination from '../../components/ui/Pagination';
 import { adminAPI } from '../../services/api';
 import './Stores.css';
 
@@ -67,6 +68,8 @@ const Stores = () => {
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [deletingId, setDeletingId] = useState(null);
   const [editingStore, setEditingStore] = useState(null);
+  const [currentPage, setCurrentPage] = useState(1);
+  const itemsPerPage = 5;
 
   const loadStores = useCallback(async () => {
     try {
@@ -99,6 +102,19 @@ const Stores = () => {
       return matchesText && matchesStatus;
     });
   }, [search, statusFilter, stores]);
+
+  // Paginate filtered stores
+  const paginatedStores = useMemo(() => {
+    const startIndex = (currentPage - 1) * itemsPerPage;
+    const endIndex = startIndex + itemsPerPage;
+    return filteredStores.slice(startIndex, endIndex);
+  }, [filteredStores, currentPage, itemsPerPage]);
+
+  const totalPages = Math.ceil(filteredStores.length / itemsPerPage);
+
+  const handlePageChange = (newPage) => {
+    setCurrentPage(newPage);
+  };
 
   const handleInputChange = (e) => {
     const { name, value } = e.target;
@@ -276,14 +292,20 @@ const Stores = () => {
               type="search"
               placeholder="Search by store name or location..."
               value={search}
-              onChange={(event) => setSearch(event.target.value)}
+              onChange={(event) => {
+                setSearch(event.target.value);
+                setCurrentPage(1);
+              }}
               aria-label="Search stores"
             />
           </div>
           <div>
             <select
               value={statusFilter}
-              onChange={(event) => setStatusFilter(event.target.value)}
+              onChange={(event) => {
+                setStatusFilter(event.target.value);
+                setCurrentPage(1);
+              }}
               aria-label="Filter by status"
             >
               <option value="all">All Statuses</option>
@@ -299,24 +321,17 @@ const Stores = () => {
         </div>
         <Table
           columns={columns}
-          data={filteredStores}
+          data={paginatedStores}
           striped
           emptyMessage={loading ? 'Fetching stores...' : 'No stores found'}
         />
-        <div className="stores-card__pagination">
-          <button type="button" className="pagination-btn" disabled>
-            Previous
-          </button>
-          <button type="button" className="pagination-btn pagination-btn--active">
-            1
-          </button>
-          <button type="button" className="pagination-btn">
-            2
-          </button>
-          <button type="button" className="pagination-btn">
-            Next
-          </button>
-        </div>
+        <Pagination
+          currentPage={currentPage}
+          totalPages={totalPages}
+          totalItems={filteredStores.length}
+          itemsPerPage={itemsPerPage}
+          onPageChange={handlePageChange}
+        />
       </div>
 
       <Modal

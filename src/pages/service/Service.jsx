@@ -1,6 +1,8 @@
-import { useState } from 'react';
+import { useState, useEffect, useMemo } from 'react';
 import Table from '../../components/ui/Table';
 import Modal from '../../components/ui/Modal';
+import Pagination from '../../components/ui/Pagination';
+import { adminAPI } from '../../services/api';
 import './Service.css';
 
 const DotsIcon = () => (
@@ -17,10 +19,10 @@ const DotsIcon = () => (
   </svg>
 );
 
-const EditIcon = () => (
+const DeleteIcon = () => (
   <svg width="16" height="16" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
     <path
-      d="M12.0727 5.34314L15.6574 1.75736C16.4385 0.976311 17.7048 0.976311 18.4859 1.75736L22.2701 5.5416C23.0511 6.32265 23.0511 7.58898 22.2701 8.37003L18.6843 11.9558M12.0727 5.34314L1.93801 15.4779C1.56548 15.8504 1.33374 16.3523 1.27818 16.8886L1 19.5317C0.913414 20.3629 1.59705 21.0465 2.42834 20.96L5.07137 20.6818C5.60772 20.6263 6.10958 20.3945 6.48211 20.022L16.6168 9.8873M12.0727 5.34314L16.6168 9.8873"
+      d="M3 6h18M19 6v14a2 2 0 01-2 2H7a2 2 0 01-2-2V6m3 0V4a2 2 0 012-2h4a2 2 0 012 2v2M10 11v6M14 11v6"
       stroke="currentColor"
       strokeWidth="1.8"
       strokeLinecap="round"
@@ -29,20 +31,42 @@ const EditIcon = () => (
   </svg>
 );
 
-const services = [
-  { id: 1, name: 'Standard Wash & Fold', price: 1.75, lastUpdated: '2023-10-26' },
-  { id: 2, name: 'Delicate Wash', price: 2.5, lastUpdated: '2023-10-26' },
-  { id: 3, name: 'Dry Cleaning (per item)', price: 8.0, lastUpdated: '2023-10-25' },
-  { id: 4, name: 'Ironing Service', price: 1.0, lastUpdated: '2023-10-24' },
-];
-
 const Pricing = () => {
   const [isModalOpen, setIsModalOpen] = useState(false);
+  const [services, setServices] = useState([]);
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState(null);
+  const [submitting, setSubmitting] = useState(false);
+  const [currentPage, setCurrentPage] = useState(1);
+  const itemsPerPage = 5;
   const [formData, setFormData] = useState({
     name: '',
-    price: '',
-    lastUpdated: new Date().toISOString().split('T')[0], // Today's date as default
+    image: '',
+    description: '',
   });
+
+  // Fetch services on component mount
+  useEffect(() => {
+    fetchServices();
+  }, []);
+
+  const fetchServices = async () => {
+    try {
+      setLoading(true);
+      setError(null);
+      const response = await adminAPI.getAllServices();
+      if (response.success) {
+        setServices(response.data || []);
+      } else {
+        setError(response.message || 'Failed to fetch services');
+      }
+    } catch (err) {
+      setError(err.message || 'Error loading services');
+      console.error('Error fetching services:', err);
+    } finally {
+      setLoading(false);
+    }
+  };
 
   const handleInputChange = (e) => {
     const { name, value } = e.target;
@@ -61,33 +85,117 @@ const Pricing = () => {
     // Reset form when closing
     setFormData({
       name: '',
-      price: '',
-      lastUpdated: new Date().toISOString().split('T')[0],
+      image: '',
+      description: '',
+    });
+    setError(null);
+  };
+
+  const handleSubmit = async (e) => {
+    e.preventDefault();
+    try {
+      setSubmitting(true);
+      setError(null);
+      const response = await adminAPI.createService(formData);
+      if (response.success) {
+        handleCloseModal();
+        setCurrentPage(1); // Reset to first page
+        fetchServices(); // Refresh the list
+      } else {
+        setError(response.message || 'Failed to create service');
+      }
+    } catch (err) {
+      setError(err.message || 'Error creating service');
+      console.error('Error creating service:', err);
+    } finally {
+      setSubmitting(false);
+    }
+  };
+
+  const handleDelete = async (id) => {
+    if (!window.confirm('Are you sure you want to delete this service?')) {
+      return;
+    }
+
+    try {
+      setError(null);
+      const response = await adminAPI.deleteService(id);
+      if (response.success) {
+        // If we deleted the last item on the current page, go back a page
+        const remainingItems = services.length - 1;
+        const maxPage = Math.ceil(remainingItems / itemsPerPage);
+        if (currentPage > maxPage && maxPage > 0) {
+          setCurrentPage(maxPage);
+        }
+        fetchServices(); // Refresh the list
+      } else {
+        setError(response.message || 'Failed to delete service');
+      }
+    } catch (err) {
+      setError(err.message || 'Error deleting service');
+      console.error('Error deleting service:', err);
+    }
+  };
+
+  const formatDate = (dateString) => {
+    if (!dateString) return 'N/A';
+    const date = new Date(dateString);
+    return date.toLocaleDateString('en-US', {
+      year: 'numeric',
+      month: 'short',
+      day: 'numeric',
     });
   };
 
-  const handleSubmit = (e) => {
-    e.preventDefault();
-    // TODO: Add service creation logic here
-    console.log('New service data:', formData);
-    // For now, just close the modal
-    handleCloseModal();
+  // Paginate services
+  const paginatedServices = useMemo(() => {
+    const startIndex = (currentPage - 1) * itemsPerPage;
+    const endIndex = startIndex + itemsPerPage;
+    return services.slice(startIndex, endIndex);
+  }, [services, currentPage, itemsPerPage]);
+
+  const totalPages = Math.ceil(services.length / itemsPerPage);
+
+  const handlePageChange = (page) => {
+    setCurrentPage(page);
   };
 
   const columns = [
     { key: 'name', header: 'Service Name', field: 'name' },
     {
-      key: 'price',
-      header: 'Price',
-      render: (value, row) => `$${row.price.toFixed(2)}`,
+      key: 'image',
+      header: 'Image URL',
+      render: (value, row) => (
+        <a href={row.image} target="_blank" rel="noopener noreferrer" style={{ color: 'var(--color-primary)', textDecoration: 'none' }}>
+          View Image
+        </a>
+      ),
     },
-    { key: 'lastUpdated', header: 'Last Updated', field: 'lastUpdated' },
+    {
+      key: 'description',
+      header: 'Description',
+      render: (value, row) => (
+        <span style={{ maxWidth: '300px', display: 'inline-block', overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>
+          {row.description || 'N/A'}
+        </span>
+      ),
+    },
+    {
+      key: 'created_at',
+      header: 'Created At',
+      render: (value, row) => formatDate(row.created_at),
+    },
     {
       key: 'actions',
       header: 'Actions',
-      render: () => (
-        <button type="button" className="icon-button" aria-label="Edit">
-          <EditIcon />
+      render: (value, row) => (
+        <button
+          type="button"
+          className="icon-button"
+          aria-label="Delete"
+          onClick={() => handleDelete(row.id)}
+        >
+          <DeleteIcon />
         </button>
       ),
     },
@@ -106,6 +214,18 @@ const Pricing = () => {
         </button>
       </div>
 
+      {error && !isModalOpen && (
+        <div style={{ 
+          padding: '12px 16px', 
+          backgroundColor: '#fee', 
+          color: '#c33', 
+          borderRadius: '8px', 
+          marginBottom: '16px' 
+        }}>
+          {error}
+        </div>
+      )}
+
       <div className="pricing-card">
         <div className="pricing-card__header">
           <span className="pricing-card__icon">
@@ -115,32 +235,30 @@ const Pricing = () => {
             <p className="text-muted" style={{ marginBottom: 4 }}>
               Current Services
             </p>
-            <strong>Latest prices & updates</strong>
+            <strong>All available services</strong>
           </div>
         </div>
-        <Table
-          columns={columns}
-          data={services}
-          striped
-          emptyMessage="No services found"
-        />
-        <div className="table-pagination">
-          <span className="text-muted">Showing 1-8 of 56 services</span>
-          <div className="table-pagination__buttons">
-            <button type="button" className="pagination-btn">
-              Previous
-            </button>
-            <button type="button" className="pagination-btn">
-              1
-            </button>
-            <button type="button" className="pagination-btn">
-              2
-            </button>
-            <button type="button" className="pagination-btn">
-              Next
-            </button>
+        {loading ? (
+          <div style={{ padding: '40px', textAlign: 'center', color: '#666' }}>
+            Loading services...
           </div>
-        </div>
+        ) : (
+          <>
+            <Table
+              columns={columns}
+              data={paginatedServices}
+              striped
+              emptyMessage="No services found"
+            />
+            <Pagination
+              currentPage={currentPage}
+              totalPages={totalPages}
+              totalItems={services.length}
+              itemsPerPage={itemsPerPage}
+              onPageChange={handlePageChange}
+            />
+          </>
+        )}
       </div>
 
       <Modal
@@ -148,6 +266,17 @@ const Pricing = () => {
         onClose={handleCloseModal}
         title="Add New Service"
       >
+        {error && isModalOpen && (
+          <div style={{ 
+            padding: '12px 16px', 
+            backgroundColor: '#fee', 
+            color: '#c33', 
+            borderRadius: '8px', 
+            marginBottom: '16px' 
+          }}>
+            {error}
+          </div>
+        )}
         <form onSubmit={handleSubmit} className="modal-form">
           <div className="modal-form__field">
             <label className="modal-form__label" htmlFor="serviceName">
@@ -162,37 +291,38 @@ const Pricing = () => {
               className="modal-form__input"
               placeholder="Enter service name"
               required
+              disabled={submitting}
             />
           </div>
           <div className="modal-form__field">
-            <label className="modal-form__label" htmlFor="servicePrice">
-              Price ($) <span className="required">*</span>
+            <label className="modal-form__label" htmlFor="serviceImage">
+              Image URL <span className="required">*</span>
             </label>
             <input
-              type="number"
-              id="servicePrice"
-              name="price"
-              value={formData.price}
+              type="url"
+              id="serviceImage"
+              name="image"
+              value={formData.image}
               onChange={handleInputChange}
               className="modal-form__input"
-              placeholder="0.00"
-              min="0"
-              step="0.01"
+              placeholder="https://example.com/image.jpg"
               required
+              disabled={submitting}
             />
           </div>
           <div className="modal-form__field">
-            <label className="modal-form__label" htmlFor="serviceLastUpdated">
-              Last Updated <span className="required">*</span>
+            <label className="modal-form__label" htmlFor="serviceDescription">
+              Description
             </label>
-            <input
-              type="date"
-              id="serviceLastUpdated"
-              name="lastUpdated"
-              value={formData.lastUpdated}
+            <textarea
+              id="serviceDescription"
+              name="description"
+              value={formData.description}
               onChange={handleInputChange}
               className="modal-form__input"
-              required
+              placeholder="Enter service description (optional)"
+              rows="4"
+              disabled={submitting}
             />
           </div>
           <div className="modal-form__actions">
@@ -200,11 +330,16 @@ const Pricing = () => {
               type="button"
               onClick={handleCloseModal}
               className="modal-form__cancel-btn"
+              disabled={submitting}
             >
               Cancel
             </button>
-            <button type="submit" className="modal-form__submit-btn">
-              Add Service
+            <button 
+              type="submit" 
+              className="modal-form__submit-btn"
+              disabled={submitting}
+            >
+              {submitting ? 'Adding...' : 'Add Service'}
             </button>
           </div>
         </form>
