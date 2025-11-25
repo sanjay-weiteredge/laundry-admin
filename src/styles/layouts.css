@@ -109,6 +109,11 @@
   background: rgb(205, 205, 205);
 }
 
+.sidebar__link:hover:not(.sidebar__link--active) .sidebar__icon,
+.sidebar__link:hover:not(.sidebar__link--active) .sidebar__arrow {
+  color: #ffffff;
+}
+
 .sidebar__footer {
   border-top: 1px solid #e5e5e5;
   padding-top: 16px;

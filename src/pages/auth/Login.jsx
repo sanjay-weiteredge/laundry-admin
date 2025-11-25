@@ -5,6 +5,7 @@ import loginIllustration from '../../assets/login.png';
 import Button from '../../components/ui/Button';
 import InputField from '../../components/ui/InputField';
 import useAuth from '../../hooks/useAuth';
+import { showErrorAlert, showSuccessAlert } from '../../utils/alerts';
 
 const Login = () => {
   const [formValues, setFormValues] = useState({
@@ -34,10 +35,13 @@ const Login = () => {
     setLoading(true);
     setError('');
     try {
-      await login(formValues);
+      const response = await login(formValues);
+      showSuccessAlert('Welcome back!', response?.message || 'Logged in successfully.');
       navigate(redirectPath, { replace: true });
     } catch (err) {
-      setError(err.message || 'Unable to log in. Please try again.');
+      const message = err.message || 'Unable to log in. Please try again.';
+      setError(message);
+      showErrorAlert('Login failed', message);
     } finally {
       setLoading(false);
     }

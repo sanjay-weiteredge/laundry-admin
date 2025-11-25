@@ -1,10 +1,59 @@
-import './Dashboard.css';
+import { useEffect, useMemo, useState } from 'react'
+import { adminAPI } from '../../services/api'
+import './Dashboard.css'
 
-
-const OrdersIcon = () => (
-  <svg width="24" height="24" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+const SparkIcon = () => (
+  <svg width="26" height="26" viewBox="0 0 32 32" fill="none" xmlns="http://www.w3.org/2000/svg">
     <path
-      d="M9 5H7C5.89543 5 5 5.89543 5 7V19C5 20.1046 5.89543 21 7 21H17C18.1046 21 19 20.1046 19 19V7C19 5.89543 18.1046 5 17 5H15M9 5C9 6.10457 9.89543 7 11 7H13C14.1046 7 15 6.10457 15 5M9 5C9 3.89543 9.89543 3 11 3H13C14.1046 3 15 3.89543 15 5M12 12H15M12 16H15M9 12H9.01M9 16H9.01"
+      d="M16 3L17.6 10.4L24 12L17.6 13.6L16 21L14.4 13.6L8 12L14.4 10.4L16 3Z"
+      stroke="currentColor"
+      strokeWidth="2"
+      strokeLinecap="round"
+      strokeLinejoin="round"
+    />
+    <path
+      d="M6 20L7 23L10 24L7 25L6 28L5 25L2 24L5 23L6 20Z"
+      stroke="currentColor"
+      strokeWidth="1.6"
+      strokeLinecap="round"
+      strokeLinejoin="round"
+    />
+    <path
+      d="M25 17L25.5 19L28 19.5L25.5 20L25 22L24.5 20L22 19.5L24.5 19L25 17Z"
+      stroke="currentColor"
+      strokeWidth="1.4"
+      strokeLinecap="round"
+      strokeLinejoin="round"
+    />
+  </svg>
+)
+
+const StoreNetworkIcon = () => (
+  <svg width="26" height="26" viewBox="0 0 32 32" fill="none" xmlns="http://www.w3.org/2000/svg">
+    <path
+      d="M5 14L6 6H26L27 14M4 14H28V27H4V14Z"
+      stroke="currentColor"
+      strokeWidth="2"
+      strokeLinecap="round"
+      strokeLinejoin="round"
+    />
+    <path d="M12 27V18H20V27" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" />
+    <path d="M4 14L9 6" stroke="currentColor" strokeWidth="2" strokeLinecap="round" />
+    <path d="M28 14L23 6" stroke="currentColor" strokeWidth="2" strokeLinecap="round" />
+  </svg>
+)
+
+const CustomerOrbitIcon = () => (
+  <svg width="26" height="26" viewBox="0 0 32 32" fill="none" xmlns="http://www.w3.org/2000/svg">
+    <circle cx="16" cy="12" r="5" stroke="currentColor" strokeWidth="2" />
+    <path
+      d="M6 26C8 22 11.6 20 16 20C20.4 20 24 22 26 26"
+      stroke="currentColor"
+      strokeWidth="2"
+      strokeLinecap="round"
+    />
+    <path
+      d="M6 10C10 8 13.2 7 16 7C18.8 7 22 8 26 10"
       stroke="currentColor"
       strokeWidth="2"
       strokeLinecap="round"
@@ -12,50 +61,41 @@ const OrdersIcon = () => (
   </svg>
 )
 
-const RevenueIcon = () => (
-  <svg width="24" height="24" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+const PendingBadgeIcon = () => (
+  <svg width="26" height="26" viewBox="0 0 32 32" fill="none" xmlns="http://www.w3.org/2000/svg">
     <path
-      d="M12 2V22M17 5H9.5C8.57174 5 7.6815 5.36875 7.02513 6.02513C6.36875 6.6815 6 7.57174 6 8.5C6 9.42826 6.36875 10.3185 7.02513 10.9749C7.6815 11.6312 8.57174 12 9.5 12H14.5C15.4283 12 16.3185 12.3687 16.9749 13.0251C17.6312 13.6815 18 14.5717 18 15.5C18 16.4283 17.6312 17.3185 16.9749 17.9749C16.3185 18.6312 15.4283 19 14.5 19H6"
+      d="M16 29L11 24H7C5.89543 24 5 23.1046 5 22V8C5 6.89543 5.89543 6 7 6H25C26.1046 6 27 6.89543 27 8V22C27 23.1046 26.1046 24 25 24H21L16 29Z"
       stroke="currentColor"
       strokeWidth="2"
       strokeLinecap="round"
       strokeLinejoin="round"
     />
+    <path d="M12 14H20" stroke="currentColor" strokeWidth="2" strokeLinecap="round" />
+    <path d="M12 19H15" stroke="currentColor" strokeWidth="2" strokeLinecap="round" />
   </svg>
 )
 
-const StoresIcon = () => (
-  <svg width="24" height="24" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+const CompletedLaurelIcon = () => (
+  <svg width="26" height="26" viewBox="0 0 32 32" fill="none" xmlns="http://www.w3.org/2000/svg">
+    <circle cx="16" cy="16" r="6" stroke="currentColor" strokeWidth="2" />
+    <path d="M13.5 16.5L15.3 18.3L19 13.5" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" />
     <path
-      d="M3 21H21M5 21V7L13 2L21 7V21M9 9V21M15 9V21"
+      d="M5 12C6.5 18 11 23 16 23C21 23 25.5 18 27 12"
       stroke="currentColor"
       strokeWidth="2"
       strokeLinecap="round"
-      strokeLinejoin="round"
     />
-  </svg>
-)
-
-const UsersIcon = () => (
-  <svg width="24" height="24" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
     <path
-      d="M17 21V19C17 17.9391 16.5786 16.9217 15.8284 16.1716C15.0783 15.4214 14.0609 15 13 15H5C3.93913 15 2.92172 15.4214 2.17157 16.1716C1.42143 16.9217 1 17.9391 1 19V21M23 21V19C22.9993 18.1137 22.7044 17.2528 22.1614 16.5523C21.6184 15.8519 20.8581 15.3516 20 15.13M16 3.13C16.8604 3.35031 17.623 3.85071 18.1676 4.55232C18.7122 5.25392 19.0078 6.11683 19.0078 7.005C19.0078 7.89318 18.7122 8.75608 18.1676 9.45769C17.623 10.1593 16.8604 10.6597 16 10.88M13 7C13 9.20914 11.2091 11 9 11C6.79086 11 5 9.20914 5 7C5 4.79086 6.79086 3 9 3C11.2091 3 13 4.79086 13 7Z"
+      d="M5 12C5 12 8 12 9 10C10 8 9 5 9 5"
       stroke="currentColor"
       strokeWidth="2"
       strokeLinecap="round"
-      strokeLinejoin="round"
     />
-  </svg>
-)
-
-const TrendingUpIcon = () => (
-  <svg width="16" height="16" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
     <path
-      d="M23 6L13.5 15.5L8.5 10.5L1 18M23 6H17M23 6V12"
+      d="M27 12C27 12 24 12 23 10C22 8 23 5 23 5"
       stroke="currentColor"
       strokeWidth="2"
       strokeLinecap="round"
-      strokeLinejoin="round"
     />
   </svg>
 )
@@ -67,56 +107,180 @@ const ClockIcon = () => (
   </svg>
 )
 
-const dashboardData = {
-  metrics: {
-    totalOrders: 1247,
-    totalRevenue: 28450.75,
-    activeStores: 3,
-    activeCustomers: 156,
-    pendingOrders: 23,
-    completedToday: 48,
-  },
-  orderStatus: {
-    processing: 12,
-    'pending pickup': 8,
-    ready: 15,
-    delivered: 1156,
-    canceled: 3,
-  },
-  storePerformance: [
-    { name: 'Downtown Wash', orders: 456, revenue: 12450.50, growth: 12.5 },
-    { name: 'Uptown Dry Clean', orders: 398, revenue: 9850.25, growth: 8.3 },
-    { name: 'Riverside Laundry Hub', orders: 393, revenue: 6150.00, growth: 15.2 },
-  ],
-}
+const MetricCard = ({ icon: Icon, title, value, accent = {}, span = 2 }) => {
+  const mergedAccent = {
+    cardBg: '#ffffff',
+    iconBg: '#f3f4f6',
+    iconColor: '#111827',
+    textColor: '#111827',
+    mutedColor: '#6b7280',
+    shadow: '0 10px 30px rgba(15, 23, 42, 0.08)',
+    ...accent,
+  }
 
-const statusMeta = {
-  processing: { label: 'Processing', tone: 'status-processing' },
-  'pending pickup': { label: 'Pending', tone: 'status-pending' },
-  ready: { label: 'Ready', tone: 'status-ready' },
-  delivered: { label: 'Delivered', tone: 'status-delivered' },
-  canceled: { label: 'Canceled', tone: 'status-canceled' },
+  return (
+    <div
+      className="dashboard-metric-card"
+      style={{
+        '--card-span': span,
+        '--card-bg': mergedAccent.cardBg,
+        '--card-icon-bg': mergedAccent.iconBg,
+        '--card-icon-color': mergedAccent.iconColor,
+        '--card-text-color': mergedAccent.textColor,
+        '--card-muted-color': mergedAccent.mutedColor,
+        '--card-shadow': mergedAccent.shadow,
+      }}
+    >
+      <div className="dashboard-metric-card__icon">
+        <Icon />
+      </div>
+      <div className="dashboard-metric-card__content">
+        <p className="dashboard-metric-card__label">{title}</p>
+        <h3 className="dashboard-metric-card__value">{value}</h3>
+      </div>
+    </div>
+  )
 }
-
-const MetricCard = ({ icon: Icon, title, value, change, changeType = 'positive' }) => (
-  <div className="dashboard-metric-card">
-    <div className="dashboard-metric-card__icon">
-      <Icon />
-    </div>
-    <div className="dashboard-metric-card__content">
-      <p className="dashboard-metric-card__label">{title}</p>
-      <h3 className="dashboard-metric-card__value">{value}</h3>
-      {change && (
-        <div className={`dashboard-metric-card__change dashboard-metric-card__change--${changeType}`}>
-          <TrendingUpIcon />
-          <span>{change}</span>
-        </div>
-      )}
-    </div>
-  </div>
-)
 
 const Dashboard = () => {
+  const [metrics, setMetrics] = useState({
+    totalOrders: 0,
+    activeStores: 0,
+    activeCustomers: 0,
+    pendingOrders: 0,
+    completed: 0,
+  })
+  const [loading, setLoading] = useState(true)
+  const [error, setError] = useState(null)
+
+  useEffect(() => {
+    let isMounted = true
+
+    const fetchMetrics = async () => {
+      try {
+        setLoading(true)
+        setError(null)
+
+        const [ordersRes, storesRes, usersRes] = await Promise.all([
+          adminAPI.getOrders(),
+          adminAPI.getStores(),
+          adminAPI.getUsers(1, 1),
+        ])
+
+        if (!isMounted) return
+
+        const orders = ordersRes?.data || []
+        const stores = storesRes?.data || []
+        const totalUsers =
+          usersRes?.pagination?.totalItems ??
+          (Array.isArray(usersRes?.data) ? usersRes.data.length : 0)
+
+        const pendingOrders = orders.filter((order) => order.order_status === 'pending').length
+        const completedOrders = orders.filter((order) => order.order_status === 'delivered').length
+
+        setMetrics({
+          totalOrders: orders.length,
+          activeStores: stores.length,
+          activeCustomers: totalUsers,
+          pendingOrders,
+          completed: completedOrders,
+        })
+      } catch (err) {
+        console.error('Failed to load dashboard metrics', err)
+        if (isMounted) {
+          setError(err.message || 'Failed to load dashboard metrics')
+        }
+      } finally {
+        if (isMounted) {
+          setLoading(false)
+        }
+      }
+    }
+
+    fetchMetrics()
+
+    return () => {
+      isMounted = false
+    }
+  }, [])
+
+  const metricCards = useMemo(
+    () => [
+      {
+        icon: SparkIcon,
+        title: 'Total Orders',
+        key: 'totalOrders',
+        span: 2,
+        accent: {
+          cardBg: '#ffffff',
+          iconBg: '#fff1e6',
+          iconColor: '#b3471c',
+          textColor: '#331a0f',
+          mutedColor: 'rgba(51, 26, 15, 0.75)',
+        },
+      },
+      {
+        icon: StoreNetworkIcon,
+        title: 'Active Stores',
+        key: 'activeStores',
+        span: 2,
+        accent: {
+          cardBg: '#ffffff',
+          iconBg: '#e5f4ff',
+          iconColor: '#0f62a4',
+          textColor: '#0d2842',
+          mutedColor: 'rgba(13, 40, 66, 0.65)',
+        },
+      },
+      {
+        icon: CustomerOrbitIcon,
+        title: 'Active Customers',
+        key: 'activeCustomers',
+        span: 2,
+        accent: {
+          cardBg: '#ffffff',
+          iconBg: '#ede8ff',
+          iconColor: '#5b2dd1',
+          textColor: '#28104d',
+          mutedColor: 'rgba(40, 16, 77, 0.65)',
+        },
+      },
+      {
+        icon: PendingBadgeIcon,
+        title: 'Pending Orders',
+        key: 'pendingOrders',
+        span: 3,
+        accent: {
+          cardBg: '#ffffff',
+          iconBg: '#fff1dc',
+          iconColor: '#c0660a',
+          textColor: '#3c2103',
+          mutedColor: 'rgba(60, 33, 3, 0.7)',
+        },
+      },
+      {
+        icon: CompletedLaurelIcon,
+        title: 'Completed',
+        key: 'completed',
+        span: 3,
+        accent: {
+          cardBg: '#ffffff',
+          iconBg: '#d8ffe9',
+          iconColor: '#168152',
+          textColor: '#0d3925',
+          mutedColor: 'rgba(13, 57, 37, 0.75)',
+        },
+      },
+    ],
+    []
+  )
+
+  const renderValue = (value) => {
+    if (loading) return '...'
+    const numericValue = Number(value)
+    return Number.isNaN(numericValue) ? value : numericValue.toLocaleString()
+  }
+
   return (
     <div className="dashboard">
       <div className="dashboard__header">
@@ -129,118 +293,14 @@ const Dashboard = () => {
         </div>
       </div>
 
-      {/* Key Metrics */}
+      {error && <div className="dashboard__error">{error}</div>}
+
       <div className="dashboard__metrics">
-        <MetricCard
-          icon={OrdersIcon}
-          title="Total Orders"
-          value={dashboardData.metrics.totalOrders.toLocaleString()}
-          change="+12.5% from last month"
-        />
-        <MetricCard
-          icon={RevenueIcon}
-          title="Total Revenue"
-          value={`$${dashboardData.metrics.totalRevenue.toLocaleString('en-US', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}`}
-          change="+8.2% from last month"
-        />
-        <MetricCard
-          icon={StoresIcon}
-          title="Active Stores"
-          value={dashboardData.metrics.activeStores}
-          change="All operational"
-          changeType="neutral"
-        />
-        <MetricCard
-          icon={UsersIcon}
-          title="Active Customers"
-          value={dashboardData.metrics.activeCustomers}
-          change="+5 new this week"
-        />
+        {metricCards.map(({ icon, title, key, accent, span }) => (
+          <MetricCard key={key} icon={icon} title={title} value={renderValue(metrics[key])} accent={accent} span={span} />
+        ))}
       </div>
 
-      <div className="dashboard__grid">
-        {/* Order Status Breakdown */}
-        <div className="dashboard-card">
-          <div className="dashboard-card__header">
-            <h2 className="dashboard-card__title">Order Status</h2>
-            <span className="dashboard-card__subtitle">Current distribution</span>
-          </div>
-          <div className="dashboard-status-list">
-            {Object.entries(dashboardData.orderStatus).map(([status, count]) => {
-              const meta = statusMeta[status]
-              const total = Object.values(dashboardData.orderStatus).reduce((a, b) => a + b, 0)
-              const percentage = ((count / total) * 100).toFixed(1)
-              return (
-                <div key={status} className="dashboard-status-item">
-                  <div className="dashboard-status-item__header">
-                    <span className={`status-badge ${meta?.tone || ''}`}>{meta?.label || status}</span>
-                    <span className="dashboard-status-item__count">{count}</span>
-                  </div>
-                  <div className="dashboard-status-item__bar">
-                    <div
-                      className="dashboard-status-item__bar-fill"
-                      style={{ width: `${percentage}%` }}
-                    />
-                  </div>
-                  <span className="dashboard-status-item__percentage">{percentage}%</span>
-                </div>
-              )
-            })}
-          </div>
-        </div>
-
-        {/* Store Performance */}
-        <div className="dashboard-card">
-          <div className="dashboard-card__header">
-            <h2 className="dashboard-card__title">Store Performance</h2>
-            <span className="dashboard-card__subtitle">Top performers</span>
-          </div>
-          <div className="dashboard-stores">
-            {dashboardData.storePerformance.map((store, index) => (
-              <div key={index} className="dashboard-store-item">
-                <div className="dashboard-store-item__header">
-                  <h3 className="dashboard-store-item__name">{store.name}</h3>
-                  <span className={`dashboard-store-item__growth dashboard-store-item__growth--positive`}>
-                    +{store.growth}%
-                  </span>
-                </div>
-                <div className="dashboard-store-item__stats">
-                  <div className="dashboard-store-item__stat">
-                    <span className="dashboard-store-item__stat-label">Orders</span>
-                    <span className="dashboard-store-item__stat-value">{store.orders}</span>
-                  </div>
-                  <div className="dashboard-store-item__stat">
-                    <span className="dashboard-store-item__stat-label">Revenue</span>
-                    <span className="dashboard-store-item__stat-value">${store.revenue.toLocaleString()}</span>
-                  </div>
-                </div>
-              </div>
-            ))}
-          </div>
-        </div>
-      </div>
-
-      {/* Quick Stats */}
-      <div className="dashboard__quick-stats">
-        <div className="dashboard-quick-stat">
-          <div className="dashboard-quick-stat__icon dashboard-quick-stat__icon--pending">
-            <OrdersIcon />
-          </div>
-          <div className="dashboard-quick-stat__content">
-            <span className="dashboard-quick-stat__value">{dashboardData.metrics.pendingOrders}</span>
-            <span className="dashboard-quick-stat__label">Pending Orders</span>
-          </div>
-        </div>
-        <div className="dashboard-quick-stat">
-          <div className="dashboard-quick-stat__icon dashboard-quick-stat__icon--completed">
-            <OrdersIcon />
-          </div>
-          <div className="dashboard-quick-stat__content">
-            <span className="dashboard-quick-stat__value">{dashboardData.metrics.completedToday}</span>
-            <span className="dashboard-quick-stat__label">Completed Today</span>
-          </div>
-        </div>
-      </div>
     </div>
   )
 }

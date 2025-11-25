@@ -4,6 +4,7 @@ import Modal from '../../components/ui/Modal';
 import Pagination from '../../components/ui/Pagination';
 import { adminAPI } from '../../services/api';
 import './Stores.css';
+import { showConfirmAlert, showErrorAlert, showSuccessAlert } from '../../utils/alerts';
 
 const EditIcon = () => (
   <svg width="16" height="16" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
@@ -185,11 +186,13 @@ const Stores = () => {
 
       if (editingStore) {
         await adminAPI.updateStore(editingStore.id, basePayload);
+        showSuccessAlert('Store updated', `${formData.name} has been updated.`);
       } else {
         await adminAPI.createStore({
           ...basePayload,
           password: formData.password,
         });
+        showSuccessAlert('Store created', `${formData.name} has been added.`);
       }
 
       await loadStores();
@@ -198,21 +201,31 @@ const Stores = () => {
       setFormError(
         err.message || (editingStore ? 'Failed to update store' : 'Failed to create store')
       );
+      showErrorAlert(
+        editingStore ? 'Update failed' : 'Creation failed',
+        err.message || 'Please try again.'
+      );
     } finally {
       setIsSubmitting(false);
     }
   };
 
   const handleDeleteStore = async (storeId, storeName) => {
-    const shouldDelete = window.confirm(`Delete ${storeName}? This action cannot be undone.`);
-    if (!shouldDelete) return;
+    const { isConfirmed } = await showConfirmAlert({
+      title: `Delete ${storeName}?`,
+      text: 'This action cannot be undone.',
+      confirmButtonText: 'Yes, delete',
+    });
+    if (!isConfirmed) return;
 
     setDeletingId(storeId);
     try {
       await adminAPI.deleteStore(storeId);
       setStores((prev) => prev.filter((store) => store.id !== storeId));
+      showSuccessAlert('Store deleted', `${storeName} has been removed.`);
     } catch (err) {
       setError(err.message || 'Failed to delete store');
+      showErrorAlert('Delete failed', err.message || 'Unable to remove store.');
     } finally {
       setDeletingId(null);
     }

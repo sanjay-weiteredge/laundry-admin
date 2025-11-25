@@ -4,6 +4,7 @@ import Modal from '../../components/ui/Modal';
 import Pagination from '../../components/ui/Pagination';
 import { adminAPI } from '../../services/api';
 import './Service.css';
+import { showConfirmAlert, showErrorAlert, showSuccessAlert } from '../../utils/alerts';
 
 const DotsIcon = () => (
   <svg width="24" height="24" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
@@ -101,21 +102,27 @@ const Pricing = () => {
         handleCloseModal();
         setCurrentPage(1); // Reset to first page
         fetchServices(); // Refresh the list
+        showSuccessAlert('Service added', `${formData.name} is now available.`);
       } else {
         setError(response.message || 'Failed to create service');
+        showErrorAlert('Unable to add service', response.message || 'Please try again.');
       }
     } catch (err) {
       setError(err.message || 'Error creating service');
       console.error('Error creating service:', err);
+      showErrorAlert('Unable to add service', err.message || 'Please try again.');
     } finally {
       setSubmitting(false);
     }
   };
 
-  const handleDelete = async (id) => {
-    if (!window.confirm('Are you sure you want to delete this service?')) {
-      return;
-    }
+  const handleDelete = async (id, serviceName = 'this service') => {
+    const { isConfirmed } = await showConfirmAlert({
+      title: `Delete ${serviceName}?`,
+      text: 'This action cannot be undone.',
+      confirmButtonText: 'Yes, delete',
+    });
+    if (!isConfirmed) return;
 
     try {
       setError(null);
@@ -128,12 +135,15 @@ const Pricing = () => {
           setCurrentPage(maxPage);
         }
         fetchServices(); // Refresh the list
+        showSuccessAlert('Service deleted', `${serviceName} has been removed.`);
       } else {
         setError(response.message || 'Failed to delete service');
+        showErrorAlert('Unable to delete', response.message || 'Please try again.');
       }
     } catch (err) {
       setError(err.message || 'Error deleting service');
       console.error('Error deleting service:', err);
+      showErrorAlert('Unable to delete', err.message || 'Please try again.');
     }
   };
 
@@ -193,7 +203,7 @@ const Pricing = () => {
           type="button"
           className="icon-button"
           aria-label="Delete"
-          onClick={() => handleDelete(row.id)}
+          onClick={() => handleDelete(row.id, row.name)}
         >
           <DeleteIcon />
         </button>

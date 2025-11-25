@@ -4,14 +4,6 @@ import Pagination from '../../components/ui/Pagination';
 import { adminAPI } from '../../services/api';
 import './Orders.css';
 
-const DotsIcon = () => (
-  <svg width="20" height="20" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
-    <circle cx="5" cy="12" r="2" fill="currentColor" />
-    <circle cx="12" cy="12" r="2" fill="currentColor" />
-    <circle cx="19" cy="12" r="2" fill="currentColor" />
-  </svg>
-);
-
 const statusMeta = {
   pending: { label: 'Pending', tone: 'status-pending' },
   confirmed: { label: 'Confirmed', tone: 'status-processing' },
@@ -24,6 +16,18 @@ const statusMeta = {
   ready: { label: 'Ready for Pickup', tone: 'status-ready' },
   'pending pickup': { label: 'Pending', tone: 'status-pending' },
 };
+
+const mapOrderRecord = (order) => ({
+  orderId: String(order.id ?? ''),
+  serviceName: order.service?.name || 'Unknown service',
+  storeName: order.store?.name || 'Unknown store',
+  pickupSlot: {
+    start: order.pickup_scheduled_at || order.pickupSlot?.start || null,
+    end: order.pickup_slot_end || order.pickupSlot?.end || null,
+  },
+  status: order.order_status || order.status || 'unknown',
+  raw: order,
+});
 
 const Orders = () => {
   const [orders, setOrders] = useState([]);
@@ -46,7 +50,8 @@ const Orders = () => {
         if (!isMounted) {
           return;
         }
-        setOrders(response.data || []);
+        const normalizedOrders = (response.data || []).map(mapOrderRecord);
+        setOrders(normalizedOrders);
       } catch (err) {
         if (!isMounted) {
           return;
@@ -70,7 +75,7 @@ const Orders = () => {
   const storeOptions = useMemo(() => {
     const uniqueStores = new Set();
     orders.forEach((order) => {
-      if (order.storeName) {
+      if (order.storeName && order.storeName !== 'Unknown store') {
         uniqueStores.add(order.storeName);
       }
     });
@@ -124,29 +129,25 @@ const Orders = () => {
   };
 
   const columns = [
-    { key: 'orderId', header: 'Order ID', field: 'id' },
-    {
-      key: 'serviceName',
-      header: 'Service',
-      render: (_, row) => row.service.name || 'Unknown service',
-    },
+    { key: 'orderId', header: 'id' },
+    // {
+    //   key: 'serviceName',
+    //   header: 'Service',
+    // },
     {
       key: 'storeName',
-      header: 'Store',
-      render: (_, row) => row.store.name || 'Unknown store',
+      header: 'store',
     },
     {
       key: 'pickupSlot',
       header: 'Pickup Window',
-      render: (_, row) => formatPickupWindow(row.
-pickup_slot_end),
+      render: (_, row) => formatPickupWindow(row.pickupSlot),
     },
     {
       key: 'status',
       header: 'Status',
-      render: (value, row) => {
-        const meta = statusMeta[row.
-order_status];
+      render: (_, row) => {
+        const meta = statusMeta[row.status];
         return (
           <span className={`status-badge ${meta?.tone || ''}`}>
             {meta?.label || row.status || 'Unknown'}
