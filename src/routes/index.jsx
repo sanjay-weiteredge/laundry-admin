@@ -5,7 +5,7 @@ import ProtectedRoute from './ProtectedRoute';
 import Dashboard from '../pages/dashboard/Dashboard';
 import Stores from '../pages/store/Stores';
 import Orders from '../pages/orders/Orders';
-import Pricing from '../pages/price/Pricing';
+import Pricing from '../pages/service/Service';
 import Users from '../pages/users/Users';
 import Profile from '../pages/profile/Profile';
 
@@ -18,7 +18,7 @@ const AppRouter = () => (
         <Route path="/" element={<Dashboard />} />
         <Route path="/stores" element={<Stores />} />
         <Route path="/orders" element={<Orders />} />
-        <Route path="/pricing" element={<Pricing />} />
+        <Route path="/services" element={<Pricing />} />
         <Route path="/users" element={<Users />} />
         <Route path="/profile" element={<Profile />} />
         <Route path="*" element={<Navigate to="/" replace />} />

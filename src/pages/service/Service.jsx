@@ -1,7 +1,7 @@
 import { useState } from 'react';
 import Table from '../../components/ui/Table';
 import Modal from '../../components/ui/Modal';
-import './Pricing.css';
+import './Service.css';
 
 const DotsIcon = () => (
   <svg width="24" height="24" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
@@ -214,3 +214,4 @@ const Pricing = () => {
 };
 
 export default Pricing;
+

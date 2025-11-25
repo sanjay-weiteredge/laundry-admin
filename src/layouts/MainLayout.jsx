@@ -8,7 +8,7 @@ const routeTitles = {
   '/': 'Dashboard Overview',
   '/stores': 'Stores Management',
   '/orders': 'Orders Monitoring',
-  '/pricing': 'Service Management',
+  '/services': 'Service Management',
   '/users': 'Users Management',
   '/profile': 'Profile ',
 };

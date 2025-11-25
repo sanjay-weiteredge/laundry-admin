@@ -102,7 +102,7 @@ const navItems = [
   { label: 'Dashboard', path: '/', icon: DashboardIcon },
   { label: 'Stores', path: '/stores', icon: StoresIcon },
   { label: 'Orders', path: '/orders', icon: OrdersIcon },
-  { label: 'Services', path: '/pricing', icon: PricingIcon },
+  { label: 'Services', path: '/services', icon: PricingIcon },
   { label: 'Users', path: '/users', icon: UsersIcon },
 ];
 
