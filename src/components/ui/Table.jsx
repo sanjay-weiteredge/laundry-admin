@@ -3,40 +3,21 @@ import { Table as BootstrapTable } from 'react-bootstrap';
 import '../../styles/components/ui.css';
 
 /**
- * Reusable Table Component using Bootstrap
  * 
- * @param {Array} columns - Array of column definitions with properties:
- *   - key/field: Unique identifier for the column
- *   - header/label/title: Header text
- *   - render: Optional function to render custom cell content (value, row, index) => ReactNode
- *   - headerStyle/headerClassName: Optional styling for header
- *   - cellStyle/cellClassName: Optional styling for cells
- * @param {Array} data - Array of row data objects
- * @param {Boolean} striped - Enable striped rows
- * @param {Boolean} bordered - Add borders to table
- * @param {Boolean} hover - Enable hover effect on rows
- * @param {Boolean} responsive - Wrap table in responsive container
- * @param {String} size - Table size: 'sm' for small
- * @param {String} variant - Table variant: 'primary', 'secondary', etc.
- * @param {String} className - Additional CSS classes
- * @param {String} emptyMessage - Message to show when no data
- * @param {Function} onRowClick - Callback function when row is clicked (row, index) => void
+ * @param {Array} columns 
+ * @param {Array} data 
+ * @param {Boolean} striped 
+ * @param {Boolean} bordered 
+ * @param {Boolean} hover 
+ * @param {Boolean} responsive 
+ * @param {String} size 
+ * @param {String} variant 
+ * @param {String} className 
+ * @param {String} emptyMessage 
+ * @param {Function} onRowClick 
  * 
  * @example
- * <Table
- *   columns={[
- *     { key: 'id', header: 'ID' },
- *     { key: 'name', header: 'Name' },
- *     { key: 'email', header: 'Email', render: (value) => <a href={`mailto:${value}`}>{value}</a> }
- *   ]}
- *   data={[
- *     { id: 1, name: 'John', email: 'john@example.com' },
- *     { id: 2, name: 'Jane', email: 'jane@example.com' }
- *   ]}
- *   hover
- *   striped
- *   onRowClick={(row) => console.log('Clicked:', row)}
- * />
+ 
  */
 const Table = ({
   columns = [],
@@ -53,6 +34,7 @@ const Table = ({
   ...props
 }) => {
   const tableClasses = [
+    'table-compact',
     className,
     size && `table-${size}`,
     variant && `table-${variant}`,

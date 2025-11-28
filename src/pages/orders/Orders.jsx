@@ -17,9 +17,29 @@ const statusMeta = {
   'pending pickup': { label: 'Pending', tone: 'status-pending' },
 };
 
+const deriveServiceName = (order) => {
+  if (order?.service?.name) {
+    return order.service.name;
+  }
+
+  const serviceNames = (order?.items || [])
+    .map((item) => item?.service?.name)
+    .filter(Boolean);
+
+  if (serviceNames.length === 0) {
+    return 'Unknown service';
+  }
+
+  if (serviceNames.length === 1) {
+    return serviceNames[0];
+  }
+
+  return `${serviceNames[0]} +${serviceNames.length - 1}`;
+};
+
 const mapOrderRecord = (order) => ({
   orderId: String(order.id ?? ''),
-  serviceName: order.service?.name || 'Unknown service',
+  serviceName: deriveServiceName(order),
   storeName: order.store?.name || 'Unknown store',
   pickupSlot: {
     start: order.pickup_scheduled_at || order.pickupSlot?.start || null,
@@ -129,11 +149,11 @@ const Orders = () => {
   };
 
   const columns = [
-    { key: 'orderId', header: 'id' },
-    // {
-    //   key: 'serviceName',
-    //   header: 'Service',
-    // },
+    { key: 'orderId', header: 'orderId' },
+    {
+      key: 'serviceName',
+      header: 'Service',
+    },
     {
       key: 'storeName',
       header: 'store',
@@ -238,6 +258,7 @@ const Orders = () => {
           totalItems={filteredOrders.length}
           itemsPerPage={itemsPerPage}
           onPageChange={handlePageChange}
+          maxVisiblePages={2}
         />
       </div>
     </section>

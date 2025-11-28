@@ -137,10 +137,30 @@
   gap: 20px;
 }
 
+.service-modal-form {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 16px 20px;
+  align-items: flex-start;
+}
+
 .modal-form__field {
   display: flex;
   flex-direction: column;
   gap: 8px;
+}
+
+.service-modal-form .modal-form__field--full {
+  grid-column: 1 / -1;
+}
+
+.service-modal-form .modal-form__actions {
+  grid-column: 1 / -1;
+  justify-content: flex-end;
+}
+
+.service-modal-form textarea.modal-form__input {
+  min-height: 120px;
 }
 
 .modal-form__label {
@@ -214,6 +234,17 @@ textarea.modal-form__input {
 .modal-form__submit-btn:hover {
   background: #e96e6e;
   box-shadow: 0 4px 12px rgba(240, 131, 131, 0.35);
+}
+
+@media (max-width: 768px) {
+  .service-modal-form {
+    grid-template-columns: 1fr;
+  }
+
+  .service-modal-form .modal-form__field--full,
+  .service-modal-form .modal-form__actions {
+    grid-column: 1;
+  }
 }
 
 /* Responsive */

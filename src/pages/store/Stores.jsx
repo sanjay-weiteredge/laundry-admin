@@ -336,6 +336,8 @@ const Stores = () => {
           columns={columns}
           data={paginatedStores}
           striped
+          size="sm"
+          className="stores-table"
           emptyMessage={loading ? 'Fetching stores...' : 'No stores found'}
         />
         <Pagination
@@ -351,7 +353,7 @@ const Stores = () => {
         isOpen={isModalOpen}
         onClose={handleCloseModal}
         title={editingStore ? 'Edit Store' : 'Add New Store'}
-        size="medium"
+        dialogClassName="stores-modal"
       >
         <form onSubmit={handleSubmit} className="modal-form">
           <div className="modal-form__field">
@@ -414,23 +416,6 @@ const Stores = () => {
               required
             />
           </div>
-          {!editingStore && (
-            <div className="modal-form__field">
-              <label className="modal-form__label" htmlFor="storePassword">
-              Password <span className="required">*</span>
-              </label>
-              <input
-                type="password"
-                id="storePassword"
-                name="password"
-                value={formData.password}
-                onChange={handleInputChange}
-                className="modal-form__input"
-                placeholder="Set initial password"
-                required
-              />
-            </div>
-          )}
           <div className="modal-form__field">
             <label className="modal-form__label" htmlFor="storeLatitude">
               Latitude <span className="required">*</span>
@@ -463,6 +448,23 @@ const Stores = () => {
               required
             />
           </div>
+          {!editingStore && (
+            <div className="modal-form__field">
+              <label className="modal-form__label" htmlFor="storePassword">
+                Password <span className="required">*</span>
+              </label>
+              <input
+                type="password"
+                id="storePassword"
+                name="password"
+                value={formData.password}
+                onChange={handleInputChange}
+                className="modal-form__input"
+                placeholder="Set initial password"
+                required
+              />
+            </div>
+          )}
           <div className="modal-form__field">
             <label className="modal-form__label" htmlFor="storeStatus">
               Status <span className="required">*</span>

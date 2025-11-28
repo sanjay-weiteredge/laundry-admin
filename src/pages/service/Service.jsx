@@ -287,7 +287,7 @@ const Pricing = () => {
             {error}
           </div>
         )}
-        <form onSubmit={handleSubmit} className="modal-form">
+        <form onSubmit={handleSubmit} className="modal-form service-modal-form">
           <div className="modal-form__field">
             <label className="modal-form__label" htmlFor="serviceName">
               Service Name <span className="required">*</span>
@@ -320,7 +320,7 @@ const Pricing = () => {
               disabled={submitting}
             />
           </div>
-          <div className="modal-form__field">
+          <div className="modal-form__field modal-form__field--full">
             <label className="modal-form__label" htmlFor="serviceDescription">
               Description
             </label>

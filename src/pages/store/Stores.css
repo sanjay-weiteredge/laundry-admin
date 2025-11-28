@@ -2,6 +2,40 @@
   padding: 0;
 }
 
+/* Modal Size Override - Target store modal only */
+.stores-modal {
+  max-width: 620px !important;
+  width: calc(100% - 32px);
+  margin: 20px auto;
+}
+
+.stores-modal .modal-content {
+  border-radius: 10px;
+  border: 1px solid #f1f1f1;
+  box-shadow: 0 12px 30px rgba(15, 23, 42, 0.1);
+  max-height: 75vh;
+  overflow: hidden;
+  display: flex;
+  flex-direction: column;
+}
+
+.stores-modal .modal-header {
+  padding: 16px 20px;
+  border-bottom: 1px solid #f3f3f3;
+}
+
+.stores-modal .modal-title {
+  font-size: 1.05rem;
+  font-weight: 600;
+  color: #111827;
+}
+
+.stores-modal .modal-body {
+  padding: 16px 20px;
+  overflow-y: auto;
+  flex: 1;
+}
+
 .stores-page__header {
   display: flex;
   justify-content: space-between;
@@ -197,11 +231,37 @@
   color: #991b1b;
 }
 
+.stores-table {
+  font-size: 0.88rem;
+}
+
+.stores-table thead th {
+  padding: 10px 12px;
+  font-size: 0.78rem;
+  letter-spacing: 0.03em;
+  color: #3f3a2f;
+  font-weight: 600;
+  text-transform: uppercase;
+}
+
+.stores-table tbody td {
+  padding: 8px 12px;
+  font-size: 0.85rem;
+  line-height: 1.35;
+  vertical-align: middle;
+}
+
+.stores-table tbody tr {
+  border-bottom: 1px solid #f3ede7;
+}
+
 /* Modal Form Styles */
 .modal-form {
-  display: flex;
-  flex-direction: column;
-  gap: 20px;
+  display: grid !important;
+  grid-template-columns: repeat(2, 1fr) !important;
+  gap: 16px;
+  align-items: start;
+  width: 100%;
 }
 
 .modal-form__field {
@@ -210,10 +270,15 @@
   gap: 8px;
 }
 
+.modal-form__field--full {
+  grid-column: 1 / -1;
+}
+
 .modal-form__label {
-  font-size: 0.95rem;
+  font-size: 0.85rem;
   font-weight: 500;
-  color: #333;
+  color: #1f2937;
+  margin-bottom: 2px;
 }
 
 .modal-form__label .required {
@@ -221,60 +286,79 @@
 }
 
 .modal-form__input {
-  padding: 10px 16px;
-  border: 1px solid #e5e5e5;
+  padding: 8px 12px;
+  border: 1px solid #d9dce3;
   border-radius: 8px;
-  font-size: 0.95rem;
-  transition: border-color 0.2s ease, box-shadow 0.2s ease;
+  font-size: 0.85rem;
+  transition: border-color 0.15s ease, box-shadow 0.15s ease;
   font-family: inherit;
+  background: #fff;
+  color: #1f2937;
+  height: 45px;
+}
+
+.modal-form__input:hover {
+  border-color: #cbd1dd;
 }
 
 .modal-form__input:focus {
   outline: none;
   border-color: var(--color-primary);
-  box-shadow: 0 0 0 3px rgba(240, 131, 131, 0.15);
+  box-shadow: 0 0 0 2px rgba(240, 131, 131, 0.15);
+}
+
+.error-text {
+  grid-column: 1 / -1;
+  margin: 0;
+  padding: 12px;
+  background: #fee2e2;
+  border: 1px solid #fecaca;
+  border-radius: 8px;
+  color: #991b1b;
+  font-size: 0.9rem;
 }
 
 .modal-form__actions {
   display: flex;
-  gap: 12px;
+  gap: 10px;
   justify-content: flex-end;
-  margin-top: 8px;
+  margin-top: 4px;
+  grid-column: 1 / -1;
 }
 
 .modal-form__cancel-btn {
-  padding: 10px 20px;
-  border: 1px solid #e5e5e5;
+  padding: 8px 16px;
+  border: 1px solid #d9dce3;
   border-radius: 8px;
   background: #ffffff;
-  color: #333;
-  font-size: 0.95rem;
+  color: #1f2937;
+  font-size: 0.9rem;
   font-weight: 500;
   cursor: pointer;
   transition: all 0.2s ease;
 }
 
 .modal-form__cancel-btn:hover {
-  background: #f9f9f9;
-  border-color: #d0d0d0;
+  background: #f3f4f6;
+  border-color: #cbd1dd;
 }
 
 .modal-form__submit-btn {
-  padding: 10px 20px;
+  padding: 8px 18px;
   border: none;
   border-radius: 8px;
   background: var(--color-primary);
   color: #ffffff;
-  font-size: 0.95rem;
+  font-size: 0.9rem;
   font-weight: 600;
   cursor: pointer;
-  transition: all 0.2s ease;
-  box-shadow: 0 2px 8px rgba(240, 131, 131, 0.25);
+  transition: background 0.2s ease, box-shadow 0.2s ease;
+  box-shadow: 0 4px 12px rgba(240, 131, 131, 0.25);
 }
 
 .modal-form__submit-btn:hover {
   background: #e96e6e;
-  box-shadow: 0 4px 12px rgba(240, 131, 131, 0.35);
+  box-shadow: 0 6px 16px rgba(240, 131, 131, 0.35);
 }
 
 /* Responsive */
@@ -303,8 +387,18 @@
     justify-content: center;
   }
 
+  .modal-form {
+    grid-template-columns: 1fr;
+    gap: 18px;
+  }
+
+  .modal-form__field--full {
+    grid-column: 1;
+  }
+
   .modal-form__actions {
     flex-direction: column-reverse;
+    grid-column: 1;
   }
 
   .modal-form__cancel-btn,

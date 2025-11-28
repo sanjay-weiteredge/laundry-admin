@@ -5,14 +5,24 @@ const baseButtonStyles = {
   cancelButtonColor: '#6b7280',
 };
 
+const basePopupStyles = {
+  width: 360,
+  padding: '1.25rem',
+  customClass: {
+    popup: 'sweet-alert-popup',
+    confirmButton: 'sweet-alert-btn',
+    cancelButton: 'sweet-alert-btn sweet-alert-btn--cancel',
+  },
+};
+
 export const showSuccessAlert = (title, text = '') => {
   return Swal.fire({
     icon: 'success',
     title,
     text,
-    timer: 2000,
-    timerProgressBar: true,
-    showConfirmButton: false,
+    confirmButtonText: 'OK',
+    ...baseButtonStyles,
+    ...basePopupStyles,
   });
 };
 
@@ -23,6 +33,7 @@ export const showErrorAlert = (title, text = '') => {
     text,
     confirmButtonText: 'Okay',
     ...baseButtonStyles,
+    ...basePopupStyles,
   });
 };
 
@@ -43,6 +54,7 @@ export const showConfirmAlert = ({
     reverseButtons: true,
     focusCancel: true,
     ...baseButtonStyles,
+    ...basePopupStyles,
   });
 };
 
