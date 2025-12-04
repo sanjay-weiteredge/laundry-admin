@@ -1,12 +1,10 @@
-const API_BASE_URL = 'https://backend.thelaundryguyz.com/api';
+// const API_BASE_URL = 'https://backend.thelaundryguyz.com/api';
+const API_BASE_URL = 'http://localhost:8000/api'
 
-
-// Helper function to get auth token from localStorage
 const getAuthToken = () => {
   return localStorage.getItem('authToken');
 };
 
-// Helper function to set auth token in localStorage
 const setAuthToken = (token) => {
   if (token) {
     localStorage.setItem('authToken', token);
@@ -15,13 +13,11 @@ const setAuthToken = (token) => {
   }
 };
 
-// Helper function to get stored user from localStorage
 const getStoredUser = () => {
   const userStr = localStorage.getItem('authUser');
   return userStr ? JSON.parse(userStr) : null;
 };
 
-// Helper function to set user in localStorage
 const setStoredUser = (user) => {
   if (user) {
     localStorage.setItem('authUser', JSON.stringify(user));
@@ -30,7 +26,6 @@ const setStoredUser = (user) => {
   }
 };
 
-// Generic API request function
 const apiRequest = async (endpoint, options = {}) => {
   const token = getAuthToken();
   const headers = {
@@ -50,7 +45,6 @@ const apiRequest = async (endpoint, options = {}) => {
   try {
     const response = await fetch(`${API_BASE_URL}${endpoint}`, config);
     
-    // Try to parse JSON, but handle cases where response might not be JSON
     let data;
     const contentType = response.headers.get('content-type');
     if (contentType && contentType.includes('application/json')) {
@@ -74,18 +68,14 @@ const apiRequest = async (endpoint, options = {}) => {
 
     return data;
   } catch (error) {
-    // If it's already our custom error, re-throw it
     if (error.status) {
       throw error;
     }
-    // Otherwise, it's a network or parsing error
     throw new Error(error.message || 'Network error. Please check your connection.');
   }
 };
 
-// Admin API methods
 export const adminAPI = {
-  // Login
   login: async (email, password) => {
     const response = await apiRequest('/admin/login', {
       method: 'POST',
@@ -102,7 +92,6 @@ export const adminAPI = {
     return response;
   },
 
-  // Signup
   signup: async (name, email, password) => {
     const response = await apiRequest('/admin/signup', {
       method: 'POST',
@@ -119,14 +108,12 @@ export const adminAPI = {
     return response;
   },
 
-  // Get profile
   getProfile: async () => {
     return await apiRequest('/admin/profile', {
       method: 'GET',
     });
   },
 
-  // Fetch paginated users
   getUsers: async (page = 1, limit = 10) => {
     const params = new URLSearchParams({ page, limit });
     return await apiRequest(`/users?${params.toString()}`, {
@@ -134,7 +121,6 @@ export const adminAPI = {
     });
   },
 
-  // Fetch orders (no auth required)
   getOrders: async () => {
     return await apiRequest('/orders/all', {
       method: 'GET',
@@ -144,7 +130,6 @@ export const adminAPI = {
     });
   },
 
-  // Stores
   getStores: async () => {
     return await apiRequest('/stores/admin/stores', {
       method: 'GET',
@@ -171,7 +156,6 @@ export const adminAPI = {
     });
   },
 
-  // Services
   getAllServices: async () => {
     return await apiRequest('/services/all', {
       method: 'GET',
@@ -185,19 +169,24 @@ export const adminAPI = {
     });
   },
 
+  updateService: async (serviceId, payload) => {
+    return await apiRequest(`/services/update/${serviceId}`, {
+      method: 'PUT',
+      body: JSON.stringify(payload),
+    });
+  },
+
   deleteService: async (serviceId) => {
     return await apiRequest(`/services/delete/${serviceId}`, {
       method: 'DELETE',
     });
   },
 
-  // Logout (client-side only)
   logout: () => {
     setAuthToken(null);
     setStoredUser(null);
   },
 };
 
-// Export utility functions
 export { getAuthToken, setAuthToken, getStoredUser, setStoredUser };
 

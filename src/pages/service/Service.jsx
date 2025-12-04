@@ -32,8 +32,28 @@ const DeleteIcon = () => (
   </svg>
 );
 
+const EditIcon = () => (
+  <svg width="16" height="16" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+    <path
+      d="M11 4H4a2 2 0 00-2 2v14a2 2 0 002 2h14a2 2 0 002-2v-7"
+      stroke="currentColor"
+      strokeWidth="1.8"
+      strokeLinecap="round"
+      strokeLinejoin="round"
+    />
+    <path
+      d="M18.5 2.5a2.121 2.121 0 013 3L12 15l-4 1 1-4 9.5-9.5z"
+      stroke="currentColor"
+      strokeWidth="1.8"
+      strokeLinecap="round"
+      strokeLinejoin="round"
+    />
+  </svg>
+);
+
 const Pricing = () => {
   const [isModalOpen, setIsModalOpen] = useState(false);
+  const [editingService, setEditingService] = useState(null);
   const [services, setServices] = useState([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
@@ -44,9 +64,9 @@ const Pricing = () => {
     name: '',
     image: '',
     description: '',
+    price: '',
   });
 
-  // Fetch services on component mount
   useEffect(() => {
     fetchServices();
   }, []);
@@ -77,17 +97,35 @@ const Pricing = () => {
     }));
   };
 
-  const handleOpenModal = () => {
+  const handleOpenModal = (service = null) => {
+    if (service) {
+      setEditingService(service);
+      setFormData({
+        name: service.name || '',
+        image: service.image || '',
+        description: service.description || '',
+        price: service.price || '',
+      });
+    } else {
+      setEditingService(null);
+      setFormData({
+        name: '',
+        image: '',
+        description: '',
+        price: '',
+      });
+    }
     setIsModalOpen(true);
   };
 
   const handleCloseModal = () => {
     setIsModalOpen(false);
-    // Reset form when closing
+    setEditingService(null);
     setFormData({
       name: '',
       image: '',
       description: '',
+      price: '',
     });
     setError(null);
   };
@@ -97,20 +135,41 @@ const Pricing = () => {
     try {
       setSubmitting(true);
       setError(null);
-      const response = await adminAPI.createService(formData);
-      if (response.success) {
-        handleCloseModal();
-        setCurrentPage(1); // Reset to first page
-        fetchServices(); // Refresh the list
-        showSuccessAlert('Service added', `${formData.name} is now available.`);
+      
+      const submitData = {
+        ...formData,
+        price: formData.price === '' || formData.price === null || formData.price === undefined 
+          ? '' 
+          : parseFloat(formData.price) || 0
+      };
+      
+      let response;
+      if (editingService && editingService.id) {
+        response = await adminAPI.updateService(editingService.id, submitData);
+        if (response.success) {
+          handleCloseModal();
+          fetchServices(); 
+          showSuccessAlert('Service updated', `${formData.name} has been updated.`);
+        } else {
+          setError(response.message || 'Failed to update service');
+          showErrorAlert('Unable to update service', response.message || 'Please try again.');
+        }
       } else {
-        setError(response.message || 'Failed to create service');
-        showErrorAlert('Unable to add service', response.message || 'Please try again.');
+        response = await adminAPI.createService(formData);
+        if (response.success) {
+          handleCloseModal();
+          setCurrentPage(1); 
+          fetchServices(); 
+          showSuccessAlert('Service added', `${formData.name} is now available.`);
+        } else {
+          setError(response.message || 'Failed to create service');
+          showErrorAlert('Unable to add service', response.message || 'Please try again.');
+        }
       }
     } catch (err) {
-      setError(err.message || 'Error creating service');
-      console.error('Error creating service:', err);
-      showErrorAlert('Unable to add service', err.message || 'Please try again.');
+      setError(err.message || `Error ${editingService ? 'updating' : 'creating'} service`);
+      console.error(`Error ${editingService ? 'updating' : 'creating'} service:`, err);
+      showErrorAlert(`Unable to ${editingService ? 'update' : 'add'} service`, err.message || 'Please try again.');
     } finally {
       setSubmitting(false);
     }
@@ -128,13 +187,12 @@ const Pricing = () => {
       setError(null);
       const response = await adminAPI.deleteService(id);
       if (response.success) {
-        // If we deleted the last item on the current page, go back a page
         const remainingItems = services.length - 1;
         const maxPage = Math.ceil(remainingItems / itemsPerPage);
         if (currentPage > maxPage && maxPage > 0) {
           setCurrentPage(maxPage);
         }
-        fetchServices(); // Refresh the list
+        fetchServices(); 
         showSuccessAlert('Service deleted', `${serviceName} has been removed.`);
       } else {
         setError(response.message || 'Failed to delete service');
@@ -156,8 +214,6 @@ const Pricing = () => {
       day: 'numeric',
     });
   };
-
-  // Paginate services
   const paginatedServices = useMemo(() => {
     const startIndex = (currentPage - 1) * itemsPerPage;
     const endIndex = startIndex + itemsPerPage;
@@ -182,6 +238,13 @@ const Pricing = () => {
       ),
     },
     {
+      key: 'price',
+      header: 'Price',
+      render: (value, row) => (
+        <span>₹{parseFloat(row.price || 0).toFixed(2)}</span>
+      ),
+    },
+    {
       key: 'description',
       header: 'Description',
       render: (value, row) => (
@@ -199,14 +262,25 @@ const Pricing = () => {
       key: 'actions',
       header: 'Actions',
       render: (value, row) => (
-        <button
-          type="button"
-          className="icon-button"
-          aria-label="Delete"
-          onClick={() => handleDelete(row.id, row.name)}
-        >
-          <DeleteIcon />
-        </button>
+        <div style={{ display: 'flex', gap: '8px' }}>
+          <button
+            type="button"
+            className="icon-button"
+            aria-label="Edit"
+            onClick={() => handleOpenModal(row)}
+            style={{ color: 'var(--color-primary)' }}
+          >
+            <EditIcon />
+          </button>
+          <button
+            type="button"
+            className="icon-button"
+            aria-label="Delete"
+            onClick={() => handleDelete(row.id, row.name)}
+          >
+            <DeleteIcon />
+          </button>
+        </div>
       ),
     },
   ];
@@ -274,7 +348,7 @@ const Pricing = () => {
       <Modal
         isOpen={isModalOpen}
         onClose={handleCloseModal}
-        title="Add New Service"
+        title={editingService ? "Edit Service" : "Add New Service"}
       >
         {error && isModalOpen && (
           <div style={{ 
@@ -320,6 +394,24 @@ const Pricing = () => {
               disabled={submitting}
             />
           </div>
+          <div className="modal-form__field">
+            <label className="modal-form__label" htmlFor="servicePrice">
+              Price (₹) <span className="required">*</span>
+            </label>
+            <input
+              type="number"
+              id="servicePrice"
+              name="price"
+              value={formData.price}
+              onChange={handleInputChange}
+              className="modal-form__input"
+              placeholder="0.00"
+              step="0.01"
+              min="0"
+              required
+              disabled={submitting}
+            />
+          </div>
           <div className="modal-form__field modal-form__field--full">
             <label className="modal-form__label" htmlFor="serviceDescription">
               Description
@@ -349,7 +441,10 @@ const Pricing = () => {
               className="modal-form__submit-btn"
               disabled={submitting}
             >
-              {submitting ? 'Adding...' : 'Add Service'}
+              {submitting 
+                ? (editingService ? 'Updating...' : 'Adding...') 
+                : (editingService ? 'Update Service' : 'Add Service')
+              }
             </button>
           </div>
         </form>
