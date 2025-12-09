@@ -58,6 +58,7 @@ const Pricing = () => {
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
   const [submitting, setSubmitting] = useState(false);
+  const [togglingId, setTogglingId] = useState(null);
   const [currentPage, setCurrentPage] = useState(1);
   const itemsPerPage = 5;
   const [formData, setFormData] = useState({
@@ -65,6 +66,8 @@ const Pricing = () => {
     image: '',
     description: '',
     price: '',
+    vendor: false,
+    user: false,
   });
 
   useEffect(() => {
@@ -90,10 +93,10 @@ const Pricing = () => {
   };
 
   const handleInputChange = (e) => {
-    const { name, value } = e.target;
+    const { name, value, type, checked } = e.target;
     setFormData((prev) => ({
       ...prev,
-      [name]: value,
+      [name]: type === 'checkbox' ? checked : value,
     }));
   };
 
@@ -105,6 +108,8 @@ const Pricing = () => {
         image: service.image || '',
         description: service.description || '',
         price: service.price || '',
+        vendor: Boolean(service.vendor),
+        user: Boolean(service.user),
       });
     } else {
       setEditingService(null);
@@ -113,6 +118,8 @@ const Pricing = () => {
         image: '',
         description: '',
         price: '',
+        vendor: false,
+        user: false,
       });
     }
     setIsModalOpen(true);
@@ -126,6 +133,8 @@ const Pricing = () => {
       image: '',
       description: '',
       price: '',
+      vendor: false,
+      user: false,
     });
     setError(null);
   };
@@ -140,7 +149,9 @@ const Pricing = () => {
         ...formData,
         price: formData.price === '' || formData.price === null || formData.price === undefined 
           ? '' 
-          : parseFloat(formData.price) || 0
+          : parseFloat(formData.price) || 0,
+        vendor: Boolean(formData.vendor),
+        user: Boolean(formData.user),
       };
       
       let response;
@@ -155,7 +166,7 @@ const Pricing = () => {
           showErrorAlert('Unable to update service', response.message || 'Please try again.');
         }
       } else {
-        response = await adminAPI.createService(formData);
+        response = await adminAPI.createService(submitData);
         if (response.success) {
           handleCloseModal();
           setCurrentPage(1); 
@@ -226,6 +237,30 @@ const Pricing = () => {
     setCurrentPage(page);
   };
 
+  const handleToggleFlag = async (service, field) => {
+    const nextValue = !Boolean(service[field]);
+    const previousServices = services;
+    // optimistic update
+    setServices((prev) =>
+      prev.map((item) =>
+        item.id === service.id ? { ...item, [field]: nextValue } : item
+      )
+    );
+    setTogglingId(service.id);
+    try {
+      const response = await adminAPI.updateService(service.id, { [field]: nextValue });
+      if (!response.success) {
+        setServices(previousServices);
+        showErrorAlert('Unable to update', response.message || 'Please try again.');
+      }
+    } catch (err) {
+      setServices(previousServices);
+      showErrorAlert('Unable to update', err.message || 'Please try again.');
+    } finally {
+      setTogglingId(null);
+    }
+  };
+
   const columns = [
     { key: 'name', header: 'Service Name', field: 'name' },
     {
@@ -251,6 +286,34 @@ const Pricing = () => {
         <span style={{ maxWidth: '300px', display: 'inline-block', overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>
           {row.description || 'N/A'}
         </span>
+      ),
+    },
+    {
+      key: 'vendor',
+      header: 'Vendor',
+      render: (value, row) => (
+        <input
+          type="checkbox"
+          checked={Boolean(row.vendor)}
+          onChange={() => handleToggleFlag(row, 'vendor')}
+          disabled={togglingId === row.id || submitting}
+          aria-label={row.vendor ? 'Vendor enabled' : 'Vendor disabled'}
+          style={{ width: 16, height: 16, cursor: 'pointer' }}
+        />
+      ),
+    },
+    {
+      key: 'user',
+      header: 'User',
+      render: (value, row) => (
+        <input
+          type="checkbox"
+          checked={Boolean(row.user)}
+          onChange={() => handleToggleFlag(row, 'user')}
+          disabled={togglingId === row.id || submitting}
+          aria-label={row.user ? 'User enabled' : 'User disabled'}
+          style={{ width: 16, height: 16, cursor: 'pointer' }}
+        />
       ),
     },
     {
@@ -426,6 +489,33 @@ const Pricing = () => {
               rows="4"
               disabled={submitting}
             />
+          </div>
+          <div className="modal-form__field modal-form__field--full" style={{ display: 'flex', gap: '16px', alignItems: 'center' }}>
+            <label className="modal-form__label" style={{ marginBottom: 0 }}>
+              Visibility
+            </label>
+            <div style={{ display: 'flex', gap: '12px', alignItems: 'center' }}>
+              <label style={{ display: 'flex', alignItems: 'center', gap: '6px' }}>
+                <input
+                  type="checkbox"
+                  name="vendor"
+                  checked={formData.vendor}
+                  onChange={handleInputChange}
+                  disabled={submitting}
+                />
+                Vendor
+              </label>
+              <label style={{ display: 'flex', alignItems: 'center', gap: '6px' }}>
+                <input
+                  type="checkbox"
+                  name="user"
+                  checked={formData.user}
+                  onChange={handleInputChange}
+                  disabled={submitting}
+                />
+                User
+              </label>
+            </div>
           </div>
           <div className="modal-form__actions">
             <button

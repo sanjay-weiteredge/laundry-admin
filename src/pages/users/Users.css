@@ -135,3 +135,46 @@
   }
 }
 
+.users-actions {
+  display: flex;
+  gap: 8px;
+  align-items: center;
+  justify-content: flex-end;
+}
+
+.users-action-btn {
+  border: 1px solid #e5e5e5;
+  background: #fff;
+  border-radius: 6px;
+  padding: 6px 8px;
+  cursor: pointer;
+  font-size: 14px;
+  line-height: 1;
+  transition: all 0.2s ease;
+}
+
+.users-action-btn:hover:not(:disabled) {
+  border-color: var(--color-primary);
+  color: var(--color-primary);
+  background: #fdf2f2;
+}
+
+.users-action-btn:disabled {
+  opacity: 0.6;
+  cursor: not-allowed;
+}
+
+.users-action-btn--danger {
+  color: #c33;
+}
+
+.users-action-btn--danger:hover:not(:disabled) {
+  background: #fee;
+  border-color: #c33;
+  color: #a00;
+}
+
+.users-action-btn--ghost {
+  color: #555;
+}
+

@@ -2,6 +2,7 @@ import { useEffect, useMemo, useState } from 'react';
 import Table from '../../components/ui/Table';
 import Pagination from '../../components/ui/Pagination';
 import { adminAPI } from '../../services/api';
+import { showConfirmAlert, showSuccessAlert, showErrorAlert } from '../../utils/alerts';
 import './Users.css';
 
 const Users = () => {
@@ -11,6 +12,7 @@ const Users = () => {
   const [error, setError] = useState('');
   const [page, setPage] = useState(1);
   const [currentPage, setCurrentPage] = useState(1);
+  const [deletingId, setDeletingId] = useState(null);
   const itemsPerPage = 5;
   const [pagination, setPagination] = useState({
     page: 1,
@@ -79,6 +81,53 @@ const Users = () => {
     setCurrentPage(newPage);
   };
 
+  const handleDelete = async (userId, name = 'this user') => {
+    const { isConfirmed } = await showConfirmAlert({
+      title: `Delete ${name}?`,
+      text: 'This action cannot be undone.',
+      confirmButtonText: 'Yes, delete',
+    });
+    if (!isConfirmed) return;
+
+    try {
+      setDeletingId(userId);
+      const response = await adminAPI.deleteUser(userId);
+      if (response.success) {
+        setUsers((prev) => prev.filter((u) => u.id !== userId));
+        showSuccessAlert('User deleted', `${name} has been removed.`);
+      } else {
+        showErrorAlert('Unable to delete', response.message || 'Please try again.');
+      }
+    } catch (err) {
+      showErrorAlert('Unable to delete', err.message || 'Please try again.');
+    } finally {
+      setDeletingId(null);
+    }
+  };
+
+  const handleReport = async (userId, name = 'this user') => {
+    const { isConfirmed } = await showConfirmAlert({
+      title: `Report ${name}?`,
+      text: 'This will block the user from logging in.',
+      confirmButtonText: 'Yes, report',
+    });
+    if (!isConfirmed) return;
+
+    try {
+      const response = await adminAPI.reportUser(userId);
+      if (response.success) {
+        showSuccessAlert('User reported', `${name} has been blocked from login.`);
+        setUsers((prev) =>
+          prev.map((u) => (u.id === userId ? { ...u, action_button: true } : u))
+        );
+      } else {
+        showErrorAlert('Unable to report', response.message || 'Please try again.');
+      }
+    } catch (err) {
+      showErrorAlert('Unable to report', err.message || 'Please try again.');
+    }
+  };
+
   const columns = [
     { key: 'name', header: 'Customer Name', field: 'name' },
     { key: 'phone', header: 'Phone Number', field: 'phone' },
@@ -95,6 +144,31 @@ const Users = () => {
       key: 'orders',
       header: 'Total Orders',
       render: (value, row) => <strong>{row.totalOrders}</strong>,
+    },
+    {
+      key: 'actions',
+      header: 'Actions',
+      render: (value, row) => (
+        <div className="users-actions">
+          <button
+            type="button"
+            className="users-action-btn users-action-btn--danger"
+            onClick={() => handleDelete(row.id, row.name || 'this user')}
+            disabled={deletingId === row.id}
+            aria-label={`Delete ${row.name || 'user'}`}
+          >
+            🗑
+          </button>
+          <button
+            type="button"
+            className="users-action-btn users-action-btn--ghost"
+            onClick={() => handleReport(row.id, row.name || 'this user')}
+            aria-label={`Report ${row.name || 'user'}`}
+          >
+            ⚑
+          </button>
+        </div>
+      ),
     },
   ];
 

@@ -121,6 +121,18 @@ export const adminAPI = {
     });
   },
 
+  deleteUser: async (userId) => {
+    return await apiRequest(`/users/${userId}`, {
+      method: 'DELETE',
+    });
+  },
+
+  reportUser: async (userId) => {
+    return await apiRequest(`/users/${userId}/report`, {
+      method: 'POST',
+    });
+  },
+
   getOrders: async () => {
     return await apiRequest('/orders/all', {
       method: 'GET',
@@ -156,8 +168,9 @@ export const adminAPI = {
     });
   },
 
-  getAllServices: async () => {
-    return await apiRequest('/services/all', {
+  getAllServices: async (audience) => {
+    const query = audience ? `?audience=${encodeURIComponent(audience)}` : '';
+    return await apiRequest(`/services/all${query}`, {
       method: 'GET',
     });
   },
