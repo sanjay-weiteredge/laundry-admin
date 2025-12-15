@@ -7,15 +7,11 @@ import './Stores.css';
 import { showConfirmAlert, showErrorAlert, showSuccessAlert } from '../../utils/alerts';
 
 const EditIcon = () => (
-  <svg width="16" height="16" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
-    <path
-      d="M12.0727 5.34314L15.6574 1.75736C16.4385 0.976311 17.7048 0.976311 18.4859 1.75736L22.2701 5.5416C23.0511 6.32265 23.0511 7.58898 22.2701 8.37003L18.6843 11.9558M12.0727 5.34314L1.93801 15.4779C1.56548 15.8504 1.33374 16.3523 1.27818 16.8886L1 19.5317C0.913414 20.3629 1.59705 21.0465 2.42834 20.96L5.07137 20.6818C5.60772 20.6263 6.10958 20.3945 6.48211 20.022L16.6168 9.8873M12.0727 5.34314L16.6168 9.8873"
-      stroke="currentColor"
-      strokeWidth="1.8"
-      strokeLinecap="round"
-      strokeLinejoin="round"
-    />
-  </svg>
+  <svg width="16" height="16" viewBox="0 0 33 33" fill="none" xmlns="http://www.w3.org/2000/svg">
+<path d="M16.0939 4.02356H6.70576C5.99437 4.02356 5.31211 4.30616 4.80907 4.80919C4.30604 5.31223 4.02344 5.99449 4.02344 6.70589V25.4822C4.02344 26.1936 4.30604 26.8758 4.80907 27.3789C5.31211 27.8819 5.99437 28.1645 6.70576 28.1645H25.482C26.1934 28.1645 26.8757 27.8819 27.3787 27.3789C27.8818 26.8758 28.1644 26.1936 28.1644 25.4822V16.094" stroke="#676767" stroke-width="2.68233" stroke-linecap="round" stroke-linejoin="round"/>
+<path d="M24.6441 3.52055C25.1776 2.987 25.9012 2.68726 26.6558 2.68726C27.4103 2.68726 28.134 2.987 28.6675 3.52055C29.2011 4.0541 29.5008 4.77774 29.5008 5.53229C29.5008 6.28684 29.2011 7.01049 28.6675 7.54404L16.5796 19.6333C16.2612 19.9515 15.8678 20.1844 15.4356 20.3106L11.5825 21.4371C11.4671 21.4708 11.3447 21.4728 11.2283 21.443C11.1118 21.4132 11.0055 21.3526 10.9205 21.2676C10.8355 21.1826 10.7749 21.0763 10.7451 20.9598C10.7153 20.8434 10.7173 20.721 10.7509 20.6056L11.8775 16.7525C12.0043 16.3207 12.2377 15.9277 12.5562 15.6098L24.6441 3.52055Z" stroke="#676767" stroke-width="2.68233" stroke-linecap="round" stroke-linejoin="round"/>
+</svg>
+  
 );
 
 const DeleteIcon = () => (
@@ -92,7 +88,13 @@ const Stores = () => {
 
   const filteredStores = useMemo(() => {
     const term = search.trim().toLowerCase();
-    return stores.filter((store) => {
+    const sortedStores = [...stores].sort((a, b) => {
+      const idA = typeof a.id === 'number' ? a.id : Number(a.id) || 0;
+      const idB = typeof b.id === 'number' ? b.id : Number(b.id) || 0;
+      return idA - idB;
+    });
+
+    return sortedStores.filter((store) => {
       const storeStatus = store.is_active ? 'active' : 'inactive';
       const matchesText =
         !term ||
@@ -231,10 +233,8 @@ const Stores = () => {
     }
   };
 
-  const formatDate = (value) =>
-    value ? new Date(value).toLocaleDateString() : '—';
-
   const columns = [
+    { key: 'id', header: 'Store ID', field: 'id' },
     { key: 'name', header: 'Store Name', field: 'name' },
     { key: 'email', header: 'Email', field: 'email' },
     { key: 'phone', header: 'Phone', field: 'phone' },
@@ -242,11 +242,6 @@ const Stores = () => {
       key: 'address',
       header: 'Address',
       render: (_, row) => row.address || '—',
-    },
-    {
-      key: 'created_at',
-      header: 'Added On',
-      render: (_, row) => formatDate(row.created_at),
     },
     {
       key: 'status',
@@ -328,7 +323,6 @@ const Stores = () => {
           </div>
         </div>
         <div>
-          <p className="text-muted">Current Stores</p>
           {loading && <p className="small-text text-muted">Loading stores...</p>}
           {error && <p className="error-text">{error}</p>}
         </div>

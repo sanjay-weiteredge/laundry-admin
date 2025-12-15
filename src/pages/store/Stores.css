@@ -2,7 +2,6 @@
   padding: 0;
 }
 
-/* Modal Size Override - Target store modal only */
 .stores-modal {
   max-width: 620px !important;
   width: calc(100% - 32px);
@@ -77,7 +76,7 @@
 .stores-card__filters {
   display: flex;
   gap: 16px;
-  margin-bottom: 24px;
+  margin-bottom: 14px;
   flex-wrap: wrap;
 }
 
@@ -232,12 +231,12 @@
 }
 
 .stores-table {
-  font-size: 0.88rem;
+  font-size: 0.85rem;
 }
 
 .stores-table thead th {
-  padding: 10px 12px;
-  font-size: 0.78rem;
+  padding: 8px 10px;
+  font-size: 0.75rem;
   letter-spacing: 0.03em;
   color: #3f3a2f;
   font-weight: 600;
@@ -245,8 +244,8 @@
 }
 
 .stores-table tbody td {
-  padding: 8px 12px;
-  font-size: 0.85rem;
+  padding: 7px 10px;
+  font-size: 0.82rem;
   line-height: 1.35;
   vertical-align: middle;
 }
@@ -255,7 +254,6 @@
   border-bottom: 1px solid #f3ede7;
 }
 
-/* Modal Form Styles */
 .modal-form {
   display: grid !important;
   grid-template-columns: repeat(2, 1fr) !important;
@@ -268,6 +266,7 @@
   display: flex;
   flex-direction: column;
   gap: 8px;
+  
 }
 
 .modal-form__field--full {
@@ -292,7 +291,7 @@
   font-size: 0.85rem;
   transition: border-color 0.15s ease, box-shadow 0.15s ease;
   font-family: inherit;
-  background: #fff;
+  background: rgb(234, 234, 234);
   color: #1f2937;
   height: 45px;
 }
@@ -361,7 +360,6 @@
   box-shadow: 0 6px 16px rgba(240, 131, 131, 0.35);
 }
 
-/* Responsive */
 @media (max-width: 768px) {
   .stores-page__header {
     flex-direction: column;

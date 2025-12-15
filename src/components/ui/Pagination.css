@@ -2,30 +2,30 @@
   display: flex;
   justify-content: space-between;
   align-items: center;
-  margin-top: 24px;
-  padding-top: 20px;
+  margin-top: 18px;
+  padding-top: 14px;
   border-top: 1px solid #e5e5e5;
   flex-wrap: wrap;
-  gap: 16px;
+  gap: 12px;
 }
 
 .table-pagination__buttons {
   display: flex;
-  gap: 8px;
+  gap: 4px;
   flex-wrap: wrap;
 }
 
 .pagination-btn {
-  padding: 8px 16px;
+  padding: 5px 10px;
   border: 1px solid #e5e5e5;
-  border-radius: 8px;
+  border-radius: 6px;
   background: #ffffff;
   color: #333;
-  font-size: 0.9rem;
-  font-weight: 500;
+  font-size: 0.8rem;
+  font-weight: 600;
   cursor: pointer;
   transition: all 0.2s ease;
-  min-width: 80px;
+  min-width: 36px;
 }
 
 .pagination-btn:hover:not(:disabled) {
