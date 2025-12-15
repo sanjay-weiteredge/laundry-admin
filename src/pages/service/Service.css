@@ -81,6 +81,30 @@
 }
 
 /* =========================
+   EMPTY STATE
+========================= */
+
+.empty-state {
+  padding: 80px 0;
+  text-align: center;
+  color: #4b5563;
+}
+
+.empty-state__title {
+  font-weight: 600;
+  margin-bottom: 4px;
+}
+
+.empty-state__subtitle {
+  font-size: 0.9rem;
+  margin-bottom: 14px;
+}
+
+.empty-state__button {
+  padding-inline: 32px;
+}
+
+/* =========================
    ICON BUTTONS
 ========================= */
 
@@ -356,17 +380,31 @@ textarea.modal-form__input {
    VISIBILITY CHECKBOX ROW
 ========================= */
 
-.modal-form__field--full[style] {
-  gap: 10px !important;
+.visibility-field {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
 }
 
-.modal-form__field--full label {
-  font-size: 13px;
+.visibility-field__options {
+  display: flex;
+  gap: 16px;
+  align-items: center;
+  flex-wrap: wrap;
 }
 
-/* Checkbox spacing */
-.modal-form__field--full input[type="checkbox"] {
-  transform: scale(0.9);
+.visibility-field__option {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  font-size: 14px;
+  color: #374151;
+}
+
+.visibility-field__option input[type='checkbox'] {
+  width: 16px;
+  height: 16px;
+  border-radius: 4px;
 }
 
 /* =========================

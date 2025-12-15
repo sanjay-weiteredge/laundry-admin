@@ -262,10 +262,10 @@ const Pricing = () => {
   };
 
   const columns = [
-    { key: 'name', header: 'Service Name', field: 'name' },
+    { key: 'name', header: 'Service', field: 'name' },
     {
       key: 'image',
-      header: 'Image URL',
+      header: 'Image',
       render: (value, row) => (
         <a href={row.image} target="_blank" rel="noopener noreferrer" style={{ color: 'var(--color-primary)', textDecoration: 'none' }}>
           View Image
@@ -316,11 +316,11 @@ const Pricing = () => {
         />
       ),
     },
-    {
-      key: 'created_at',
-      header: 'Created At',
-      render: (value, row) => formatDate(row.created_at),
-    },
+    // {
+    //   key: 'created_at',
+    //   header: 'Created At',
+    //   render: (value, row) => formatDate(row.created_at),
+    // },
     {
       key: 'actions',
       header: 'Actions',
@@ -356,62 +356,78 @@ const Pricing = () => {
             Services
           </p>
         </div>
-        <button type="button" className="primary-btn" onClick={handleOpenModal}>
-          + Add New Service
-        </button>
+        {!loading && services.length > 0 && (
+          <button type="button" className="primary-btn" onClick={handleOpenModal}>
+            + Add New Service
+          </button>
+        )}
       </div>
 
       {error && !isModalOpen && (
-        <div style={{ 
-          padding: '12px 16px', 
-          backgroundColor: '#fee', 
-          color: '#c33', 
-          borderRadius: '8px', 
-          marginBottom: '16px' 
-        }}>
+        <div
+          style={{
+            padding: '12px 16px',
+            backgroundColor: '#fee',
+            color: '#c33',
+            borderRadius: '8px',
+            marginBottom: '16px',
+          }}
+        >
           {error}
         </div>
       )}
 
-      <div className="pricing-card">
-        <div className="pricing-card__header">
-          <span className="pricing-card__icon">
-            <DotsIcon />
-          </span>
-          <div>
-            <p className="text-muted" style={{ marginBottom: 4 }}>
-              Current Services
-            </p>
-            <strong>All available services</strong>
-          </div>
+      {loading ? (
+        <div style={{ padding: '40px', textAlign: 'center', color: '#666' }}>
+          Loading services...
         </div>
-        {loading ? (
-          <div style={{ padding: '40px', textAlign: 'center', color: '#666' }}>
-            Loading services...
+      ) : services.length === 0 ? (
+        <div className="empty-state">
+          <p className="empty-state__title">No Services Found</p>
+          <p className="empty-state__subtitle">Start adding a service to manage pricing.</p>
+          <button
+            type="button"
+            className="primary-btn empty-state__button"
+            onClick={() => handleOpenModal()}
+          >
+            + Add Service
+          </button>
+        </div>
+      ) : (
+        <div className="pricing-card">
+          <div className="pricing-card__header">
+            <span className="pricing-card__icon">
+              <DotsIcon />
+            </span>
+            <div>
+              <p className="text-muted" style={{ marginBottom: 4 }}>
+                Current Services
+              </p>
+              <strong>All available services</strong>
+            </div>
           </div>
-        ) : (
-          <>
-            <Table
-              columns={columns}
-              data={paginatedServices}
-              striped
-              emptyMessage="No services found"
-            />
-            <Pagination
-              currentPage={currentPage}
-              totalPages={totalPages}
-              totalItems={services.length}
-              itemsPerPage={itemsPerPage}
-              onPageChange={handlePageChange}
-            />
-          </>
-        )}
-      </div>
+          <Table
+            columns={columns}
+            data={paginatedServices}
+            striped
+            emptyMessage="No services found"
+          />
+          <Pagination
+            currentPage={currentPage}
+            totalPages={totalPages}
+            totalItems={services.length}
+            itemsPerPage={itemsPerPage}
+            onPageChange={handlePageChange}
+            maxVisiblePages={2}
+          />
+        </div>
+      )}
 
       <Modal
         isOpen={isModalOpen}
         onClose={handleCloseModal}
-        title={editingService ? "Edit Service" : "Add New Service"}
+        title={editingService ? 'Edit Service' : 'Add New Service'}
+        dialogClassName="service-modal"
       >
         {error && isModalOpen && (
           <div style={{ 
@@ -475,6 +491,33 @@ const Pricing = () => {
               disabled={submitting}
             />
           </div>
+          <div className="modal-form__field visibility-field">
+            <label className="modal-form__label">
+              Visibility
+            </label>
+            <div className="visibility-field__options">
+              <label className="visibility-field__option">
+                <input
+                  type="checkbox"
+                  name="vendor"
+                  checked={formData.vendor}
+                  onChange={handleInputChange}
+                  disabled={submitting}
+                />
+                <span>Vendor</span>
+              </label>
+              <label className="visibility-field__option">
+                <input
+                  type="checkbox"
+                  name="user"
+                  checked={formData.user}
+                  onChange={handleInputChange}
+                  disabled={submitting}
+                />
+                <span>User</span>
+              </label>
+            </div>
+          </div>
           <div className="modal-form__field modal-form__field--full">
             <label className="modal-form__label" htmlFor="serviceDescription">
               Description
@@ -489,33 +532,6 @@ const Pricing = () => {
               rows="4"
               disabled={submitting}
             />
-          </div>
-          <div className="modal-form__field modal-form__field--full" style={{ display: 'flex', gap: '16px', alignItems: 'center' }}>
-            <label className="modal-form__label" style={{ marginBottom: 0 }}>
-              Visibility
-            </label>
-            <div style={{ display: 'flex', gap: '12px', alignItems: 'center' }}>
-              <label style={{ display: 'flex', alignItems: 'center', gap: '6px' }}>
-                <input
-                  type="checkbox"
-                  name="vendor"
-                  checked={formData.vendor}
-                  onChange={handleInputChange}
-                  disabled={submitting}
-                />
-                Vendor
-              </label>
-              <label style={{ display: 'flex', alignItems: 'center', gap: '6px' }}>
-                <input
-                  type="checkbox"
-                  name="user"
-                  checked={formData.user}
-                  onChange={handleInputChange}
-                  disabled={submitting}
-                />
-                User
-              </label>
-            </div>
           </div>
           <div className="modal-form__actions">
             <button

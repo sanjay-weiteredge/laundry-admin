@@ -1,8 +1,34 @@
 import { useEffect, useMemo, useState } from 'react';
 import Table from '../../components/ui/Table';
 import Pagination from '../../components/ui/Pagination';
+import Modal from '../../components/ui/Modal';
 import { adminAPI } from '../../services/api';
 import './Orders.css';
+
+const EyeIcon = () => (
+  <svg
+    width="20"
+    height="20"
+    viewBox="0 0 24 24"
+    fill="none"
+    xmlns="http://www.w3.org/2000/svg"
+  >
+    <path
+      d="M12 5C7 5 2.73 8.11 1 12C2.73 15.89 7 19 12 19C17 19 21.27 15.89 23 12C21.27 8.11 17 5 12 5Z"
+      stroke="currentColor"
+      strokeWidth="1.6"
+      strokeLinecap="round"
+      strokeLinejoin="round"
+    />
+    <path
+      d="M12 15C13.6569 15 15 13.6569 15 12C15 10.3431 13.6569 9 12 9C10.3431 9 9 10.3431 9 12C9 13.6569 10.3431 15 12 15Z"
+      stroke="currentColor"
+      strokeWidth="1.6"
+      strokeLinecap="round"
+      strokeLinejoin="round"
+    />
+  </svg>
+);
 
 const statusMeta = {
   pending: { label: 'Pending', tone: 'status-pending' },
@@ -57,6 +83,8 @@ const Orders = () => {
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState('');
   const [currentPage, setCurrentPage] = useState(1);
+  const [selectedOrder, setSelectedOrder] = useState(null);
+  const [isModalOpen, setIsModalOpen] = useState(false);
   const itemsPerPage = 5;
 
   useEffect(() => {
@@ -138,18 +166,19 @@ const Orders = () => {
   };
 
   const formatDate = (value) => (value ? new Date(value).toLocaleString() : '—');
-  const formatPickupWindow = (pickupSlot) => {
-    if (!pickupSlot?.start) {
-      return 'Not scheduled';
-    }
 
-    const start = new Date(pickupSlot.start).toLocaleString();
-    const end = pickupSlot.end ? new Date(pickupSlot.end).toLocaleString() : 'TBD';
-    return `${start} - ${end}`;
+  const handleViewOrder = (row) => {
+    setSelectedOrder(row.raw || row);
+    setIsModalOpen(true);
+  };
+
+  const handleCloseModal = () => {
+    setIsModalOpen(false);
+    setSelectedOrder(null);
   };
 
   const columns = [
-    { key: 'orderId', header: 'orderId' },
+    { key: 'serial', header: 'ORDERID' },
     {
       key: 'serviceName',
       header: 'Service',
@@ -157,11 +186,6 @@ const Orders = () => {
     {
       key: 'storeName',
       header: 'store',
-    },
-    {
-      key: 'pickupSlot',
-      header: 'Pickup Window',
-      render: (_, row) => formatPickupWindow(row.pickupSlot),
     },
     {
       key: 'status',
@@ -175,92 +199,141 @@ const Orders = () => {
         );
       },
     },
-    // {
-    //   key: 'actions',
-    //   header: 'Actions',
-    //   render: () => (
-    //     <button type="button" className="icon-button" aria-label="More actions">
-    //       <DotsIcon />
-    //     </button>
-    //   ),
-    // },
+    {
+      key: 'actions',
+      header: 'Actions',
+      render: (_, row) => (
+        <button
+          type="button"
+          className="icon-button"
+          aria-label="View order details"
+          onClick={() => handleViewOrder(row)}
+        >
+          <EyeIcon />
+        </button>
+      ),
+    },
   ];
+
+  const paginatedOrdersWithSerial = useMemo(() => {
+    const startIndex = (currentPage - 1) * itemsPerPage;
+    return paginatedOrders.map((order, index) => ({
+      ...order,
+      serial: startIndex + index + 1,
+    }));
+  }, [paginatedOrders, currentPage, itemsPerPage]);
 
   return (
     <section className="orders-page">
       <header>
         <p className="text-muted">Review real-time activity across all stores.</p>
       </header>
-      <div className="orders-card">
-        <div className="orders-card__filters">
-          <div className="orders-card__search">
-            <input
-              type="search"
-              placeholder="Search by Order ID, Service or Store..."
-              value={search}
+
+      {loading && orders.length === 0 ? (
+        <div className="orders-empty">
+          <p className="text-muted small-text">Loading orders...</p>
+        </div>
+      ) : orders.length === 0 ? (
+        <div className="orders-empty">
+          <p className="empty-state__title">No Orders Yet</p>
+          <p className="empty-state__subtitle">New customer orders will appear here.</p>
+        </div>
+      ) : (
+        <div className="orders-card">
+          <div className="orders-card__filters">
+            <div className="orders-card__search">
+              <input
+                type="search"
+                placeholder="Search by Order ID, Service or Store..."
+                value={search}
+                onChange={(event) => {
+                  setSearch(event.target.value);
+                  setCurrentPage(1);
+                }}
+                aria-label="Search orders"
+              />
+            </div>
+            <select
+              value={statusFilter}
               onChange={(event) => {
-                setSearch(event.target.value);
+                setStatusFilter(event.target.value);
                 setCurrentPage(1);
               }}
-              aria-label="Search orders"
-            />
+              aria-label="Filter by status"
+            >
+              <option value="all">All Statuses</option>
+              {Object.keys(statusMeta).map((status) => (
+                <option key={status} value={status}>
+                  {statusMeta[status].label}
+                </option>
+              ))}
+            </select>
+            <select
+              value={storeFilter}
+              onChange={(event) => {
+                setStoreFilter(event.target.value);
+                setCurrentPage(1);
+              }}
+              aria-label="Filter by store"
+            >
+              <option value="all">All Stores</option>
+              {storeOptions.map((store) => (
+                <option key={store} value={store}>
+                  {store}
+                </option>
+              ))}
+            </select>
           </div>
-          <select
-            value={statusFilter}
-            onChange={(event) => {
-              setStatusFilter(event.target.value);
-              setCurrentPage(1);
-            }}
-            aria-label="Filter by status"
-          >
-            <option value="all">All Statuses</option>
-            {Object.keys(statusMeta).map((status) => (
-              <option key={status} value={status}>
-                {statusMeta[status].label}
-              </option>
-            ))}
-          </select>
-          <select
-            value={storeFilter}
-            onChange={(event) => {
-              setStoreFilter(event.target.value);
-              setCurrentPage(1);
-            }}
-            aria-label="Filter by store"
-          >
-            <option value="all">All Stores</option>
-            {storeOptions.map((store) => (
-              <option key={store} value={store}>
-                {store}
-              </option>
-            ))}
-          </select>
-          {/* <button type="button" className="pagination-btn" onClick={handleReset}>
-            Reset
-          </button> */}
-        </div>
-        <div className="orders-card__header">
-          <div>
-            <strong>Latest updates across all locations</strong>
-            {loading && <p className="text-muted small-text">Loading orders...</p>}
-            {error && <p className="error-text">{error}</p>}
+          <div className="orders-card__header">
+            <div>
+              {error && <p className="error-text">{error}</p>}
+            </div>
           </div>
+          <Table
+            columns={columns}
+            data={paginatedOrdersWithSerial}
+            striped
+            emptyMessage={loading ? 'Fetching orders...' : 'No orders found'}
+          />
+          <Pagination
+            currentPage={currentPage}
+            totalPages={totalPages}
+            totalItems={filteredOrders.length}
+            itemsPerPage={itemsPerPage}
+            onPageChange={handlePageChange}
+            maxVisiblePages={2}
+          />
         </div>
-        <Table
-          columns={columns}
-          data={paginatedOrders}
-          striped
-          emptyMessage={loading ? 'Fetching orders...' : 'No orders found'}
-        />
-        <Pagination
-          currentPage={currentPage}
-          totalPages={totalPages}
-          totalItems={filteredOrders.length}
-          itemsPerPage={itemsPerPage}
-          onPageChange={handlePageChange}
-          maxVisiblePages={2}
-        />
-      </div>
+      )}
+
+      <Modal
+        isOpen={isModalOpen}
+        onClose={handleCloseModal}
+        title={`Order Details${selectedOrder ? ` #${selectedOrder.id}` : ''}`}
+      >
+        {selectedOrder && (
+          <div className="order-details-modal">
+            <p>
+              <strong>Service:</strong> {deriveServiceName(selectedOrder)}
+            </p>
+            <p>
+              <strong>Store:</strong> {selectedOrder.store?.name || 'Unknown store'}
+            </p>
+            <p>
+              <strong>Status:</strong>{' '}
+              {statusMeta[selectedOrder.order_status || selectedOrder.status]?.label ||
+                selectedOrder.status ||
+                'Unknown'}
+            </p>
+            <p>
+              <strong>Created At:</strong> {formatDate(selectedOrder.created_at)}
+            </p>
+            <p>
+              <strong>Pickup Scheduled:</strong> {formatDate(selectedOrder.pickup_scheduled_at)}
+            </p>
+          </div>
+        )}
+      </Modal>
     </section>
   );
 };

@@ -5,39 +5,63 @@ import { adminAPI } from '../../services/api';
 import { showConfirmAlert, showSuccessAlert, showErrorAlert } from '../../utils/alerts';
 import './Users.css';
 
+const DeleteIcon = () => (
+  <svg
+    width="16"
+    height="16"
+    viewBox="0 0 24 24"
+    fill="none"
+    xmlns="http://www.w3.org/2000/svg"
+  >
+    <path
+      d="M3 6h18M19 6v14a2 2 0 01-2 2H7a2 2 0 01-2-2V6m3 0V4a2 2 0 012-2h4a2 2 0 012 2v2M10 11v6M14 11v6"
+      stroke="currentColor"
+      strokeWidth="1.8"
+      strokeLinecap="round"
+      strokeLinejoin="round"
+    />
+  </svg>
+);
+
+const ReportIcon = () => (
+  <svg
+    width="16"
+    height="16"
+    viewBox="0 0 33 33"
+    fill="none"
+    xmlns="http://www.w3.org/2000/svg"
+  >
+    <path
+      d="M16.094 8.03337L26.1929 25.4819H5.99502L16.094 8.03337ZM16.094 2.68213L1.34119 28.1642H30.8468L16.094 2.68213ZM17.4351 21.4584H14.7528V24.1407H17.4351V21.4584ZM17.4351 13.4114H14.7528V18.7761H17.4351V13.4114Z"
+      fill="#676767"
+    />
+  </svg>
+);
+
 const Users = () => {
   const [users, setUsers] = useState([]);
   const [searchTerm, setSearchTerm] = useState('');
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState('');
-  const [page, setPage] = useState(1);
   const [currentPage, setCurrentPage] = useState(1);
   const [deletingId, setDeletingId] = useState(null);
+  const [initialLoadComplete, setInitialLoadComplete] = useState(false);
   const itemsPerPage = 5;
-  const [pagination, setPagination] = useState({
-    page: 1,
-    limit: 10,
-    totalPages: 1,
-    totalItems: 0,
-  });
 
   useEffect(() => {
-    fetchUsers(1);
+    fetchUsers();
   }, []);
 
-  const fetchUsers = async (pageToLoad = 1) => {
+  const fetchUsers = async () => {
     try {
-      setLoading(true);
+      if (!initialLoadComplete) {
+        setLoading(true);
+      }
       setError('');
-      const response = await adminAPI.getUsers(pageToLoad, pagination.limit);
+      const response = await adminAPI.getUsers(1, 1000); // fetch plenty so pagination works client-side
 
       if (response.success && Array.isArray(response.data)) {
         setUsers(response.data);
-        setPagination((prev) => ({
-          ...prev,
-          ...(response.pagination || {}),
-        }));
-        setPage(response.pagination?.page || pageToLoad);
       } else {
         setError('Unable to load users right now.');
       }
@@ -45,37 +69,51 @@ const Users = () => {
       setError(err.message || 'Failed to load users.');
     } finally {
       setLoading(false);
+      if (!initialLoadComplete) {
+        setInitialLoadComplete(true);
+      }
     }
   };
 
   const filteredCustomers = useMemo(() => {
     const term = searchTerm.trim().toLowerCase();
 
-    if (!term) return users;
+    // Sort users by ID ascending before applying filters
+    const sortedUsers = [...users].sort((a, b) => {
+      const idA = typeof a.id === 'number' ? a.id : Number(a.id) || 0;
+      const idB = typeof b.id === 'number' ? b.id : Number(b.id) || 0;
+      return idA - idB;
+    });
 
-    return users.filter((customer) =>
+    if (!term) return sortedUsers;
+
+    return sortedUsers.filter((customer) =>
       ['name', 'email', 'phone_number'].some((field) =>
         (customer[field] || '').toLowerCase().includes(term)
       )
     );
   }, [searchTerm, users]);
 
-  const tableData = filteredCustomers.map((customer) => ({
-    id: customer.id,
-    name: customer.name || '—',
-    phone: customer.phone_number || '—',
-    email: customer.email || '—',
-    totalOrders: Number(customer.totalOrders) || 0,
-  }));
+  const tableData = useMemo(
+    () =>
+      filteredCustomers.map((customer) => ({
+        id: customer.id,
+        name: customer.name || '—',
+        phone: customer.phone_number || '—',
+        email: customer.email || '—',
+        totalOrders: Number(customer.totalOrders) || 0,
+      })),
+    [filteredCustomers]
+  );
 
-  // Paginate filtered customers (client-side pagination)
+  // Client-side pagination like Orders page
   const paginatedCustomers = useMemo(() => {
     const startIndex = (currentPage - 1) * itemsPerPage;
     const endIndex = startIndex + itemsPerPage;
     return tableData.slice(startIndex, endIndex);
   }, [tableData, currentPage, itemsPerPage]);
 
-  const totalPages = Math.ceil(tableData.length / itemsPerPage);
+  const totalPages = Math.ceil(tableData.length / itemsPerPage) || 1;
 
   const handlePageChange = (newPage) => {
     setCurrentPage(newPage);
@@ -129,6 +167,7 @@ const Users = () => {
   };
 
   const columns = [
+    { key: 'id', header: 'User ID', field: 'id' },
     { key: 'name', header: 'Customer Name', field: 'name' },
     { key: 'phone', header: 'Phone Number', field: 'phone' },
     {
@@ -157,7 +196,7 @@ const Users = () => {
             disabled={deletingId === row.id}
             aria-label={`Delete ${row.name || 'user'}`}
           >
-            🗑
+            <DeleteIcon />
           </button>
           <button
             type="button"
@@ -165,14 +204,14 @@ const Users = () => {
             onClick={() => handleReport(row.id, row.name || 'this user')}
             aria-label={`Report ${row.name || 'user'}`}
           >
-            ⚑
+            <ReportIcon />
           </button>
         </div>
       ),
     },
   ];
 
-  if (loading) {
+  if (loading && !initialLoadComplete) {
     return (
       <section className="users-page">
         <div className="users-card">
@@ -193,7 +232,7 @@ const Users = () => {
             <button
               type="button"
               className="pagination-btn"
-              onClick={() => fetchUsers(page)}
+              onClick={fetchUsers}
             >
               Retry
             </button>
@@ -207,48 +246,58 @@ const Users = () => {
     <section className="users-page">
       <header className="users-page__header">
         <div>
-          <p className="text-muted" style={{ textTransform: 'uppercase', letterSpacing: '0.08em' }}>
+          {/* <p className="text-muted" style={{ textTransform: 'uppercase', letterSpacing: '0.08em' }}>
             Customers
-          </p>
+          </p> */}
           <p className="text-muted">Track customer contacts and recent order activity.</p>
         </div>
       </header>
 
-      <div className="users-card">
-        <div className="users-card__toolbar">
-          <div className="users-card__search-wrapper">
-            <input
-              type="search"
-              value={searchTerm}
-              placeholder="Search customers..."
-              aria-label="Search customers"
-              className="users-card__search"
-              onChange={(event) => {
-                setSearchTerm(event.target.value);
-                setCurrentPage(1);
-              }}
-            />
-          </div>
-          <span className="text-muted">
-            Showing {filteredCustomers.length} of {users.length} customers
-          </span>
+      {users.length === 0 ? (
+        <div className="users-empty">
+          <p className="empty-state__title">No Customers Found</p>
+          <p className="empty-state__subtitle">
+            Customer accounts will appear here once they sign up or place an order.
+          </p>
         </div>
+      ) : (
+        <div className="users-card">
+          <div className="users-card__toolbar">
+            <div className="users-card__search-wrapper">
+              <input
+                type="search"
+                value={searchTerm}
+                placeholder="Search customers..."
+                aria-label="Search customers"
+                className="users-card__search"
+                onChange={(event) => {
+                  setSearchTerm(event.target.value);
+                  setCurrentPage(1);
+                }}
+              />
+            </div>
+            <span className="text-muted">
+              Showing {filteredCustomers.length} of {users.length} customers
+            </span>
+          </div>
 
-        <Table
-          columns={columns}
-          data={paginatedCustomers}
-          striped
-          emptyMessage="No customers found"
-        />
+          <Table
+            columns={columns}
+            data={paginatedCustomers}
+            striped
+            emptyMessage="No customers found"
+          />
 
-        <Pagination
-          currentPage={currentPage}
-          totalPages={totalPages}
-          totalItems={tableData.length}
-          itemsPerPage={itemsPerPage}
-          onPageChange={handlePageChange}
-        />
-      </div>
+          <Pagination
+            currentPage={currentPage}
+            totalPages={totalPages}
+            totalItems={filteredCustomers.length}
+            itemsPerPage={itemsPerPage}
+            onPageChange={handlePageChange}
+            maxVisiblePages={2}
+          />
+        </div>
+      )}
     </section>
   );
 };

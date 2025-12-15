@@ -1,5 +1,6 @@
 const API_BASE_URL = 'https://backend.thelaundryguyz.com/api';
 
+
 const getAuthToken = () => {
   return localStorage.getItem('authToken');
 };

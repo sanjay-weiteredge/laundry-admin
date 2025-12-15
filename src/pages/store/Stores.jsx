@@ -288,60 +288,81 @@ const Stores = () => {
         <div>
           <p className="text-muted">Monitor each location's availability and contact details.</p>
         </div>
-        <button type="button" className="primary-btn" onClick={handleOpenModal}>
-          + Add New Store
-        </button>
+        {!loading && stores.length > 0 && (
+          <button type="button" className="primary-btn" onClick={handleOpenModal}>
+            + Add New Store
+          </button>
+        )}
       </header>
 
-      <div className="stores-card">
-        <div className="stores-card__filters">
-          <div className="stores-card__search">
-            <input
-              type="search"
-              placeholder="Search by store name or location..."
-              value={search}
-              onChange={(event) => {
-                setSearch(event.target.value);
-                setCurrentPage(1);
-              }}
-              aria-label="Search stores"
-            />
+      {loading ? (
+        <div className="stores-empty-wrapper">
+          <p className="small-text text-muted">Loading stores...</p>
+        </div>
+      ) : stores.length === 0 ? (
+        <div className="stores-empty-wrapper">
+          <p className="empty-state__title">No Store Management Found</p>
+          <p className="empty-state__subtitle">Start adding store</p>
+          <button
+            type="button"
+            className="primary-btn empty-state__button"
+            onClick={handleOpenModal}
+          >
+            + Add Store
+          </button>
+        </div>
+      ) : (
+        <div className="stores-card">
+          <div className="stores-card__filters">
+            <div className="stores-card__search">
+              <input
+                type="search"
+                placeholder="Search by store name or location..."
+                value={search}
+                onChange={(event) => {
+                  setSearch(event.target.value);
+                  setCurrentPage(1);
+                }}
+                aria-label="Search stores"
+              />
+            </div>
+            <div>
+              <select
+                value={statusFilter}
+                onChange={(event) => {
+                  setStatusFilter(event.target.value);
+                  setCurrentPage(1);
+                }}
+                aria-label="Filter by status"
+              >
+                <option value="all">All Statuses</option>
+                <option value="active">Active</option>
+                <option value="inactive">Inactive</option>
+              </select>
+            </div>
           </div>
           <div>
-            <select
-              value={statusFilter}
-              onChange={(event) => {
-                setStatusFilter(event.target.value);
-                setCurrentPage(1);
-              }}
-              aria-label="Filter by status"
-            >
-              <option value="all">All Statuses</option>
-              <option value="active">Active</option>
-              <option value="inactive">Inactive</option>
-            </select>
+            {loading && <p className="small-text text-muted">Loading stores...</p>}
+            {error && <p className="error-text">{error}</p>}
           </div>
+          <Table
+            columns={columns}
+            data={paginatedStores}
+            striped
+            size="sm"
+            className="stores-table"
+            emptyMessage={loading ? 'Fetching stores...' : 'No stores found'}
+          />
+          <Pagination
+            currentPage={currentPage}
+            totalPages={totalPages}
+            totalItems={filteredStores.length}
+            itemsPerPage={itemsPerPage}
+            onPageChange={handlePageChange}
+            maxVisiblePages={2}
+          />
         </div>
-        <div>
-          {loading && <p className="small-text text-muted">Loading stores...</p>}
-          {error && <p className="error-text">{error}</p>}
-        </div>
-        <Table
-          columns={columns}
-          data={paginatedStores}
-          striped
-          size="sm"
-          className="stores-table"
-          emptyMessage={loading ? 'Fetching stores...' : 'No stores found'}
-        />
-        <Pagination
-          currentPage={currentPage}
-          totalPages={totalPages}
-          totalItems={filteredStores.length}
-          itemsPerPage={itemsPerPage}
-          onPageChange={handlePageChange}
-        />
-      </div>
+      )}
 
       <Modal
         isOpen={isModalOpen}
