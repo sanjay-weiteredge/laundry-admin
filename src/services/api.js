@@ -1,4 +1,7 @@
 const API_BASE_URL = 'https://backend.thelaundryguyz.com/api';
+// const API_BASE_URL = 'http://localhost:8000/api';
+
+
 
 
 const getAuthToken = () => {
@@ -59,7 +62,21 @@ const apiRequest = async (endpoint, options = {}) => {
     }
 
     if (!response.ok) {
-      const errorMessage = data.message || data.error || `Request failed with status ${response.status}`;
+      let errorMessage = data.message || data.error || `Request failed with status ${response.status}`;
+      
+      // Provide more user-friendly error messages for common status codes
+      if (response.status === 500) {
+        errorMessage = 'Server error. Please try again later or contact support.';
+      } else if (response.status === 401) {
+        errorMessage = 'Authentication failed. Please log in again.';
+      } else if (response.status === 403) {
+        errorMessage = 'You do not have permission to perform this action.';
+      } else if (response.status === 404) {
+        errorMessage = 'The requested resource was not found.';
+      } else if (response.status === 429) {
+        errorMessage = 'Too many requests. Please try again later.';
+      }
+      
       const error = new Error(errorMessage);
       error.status = response.status;
       error.data = data;

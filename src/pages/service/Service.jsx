@@ -85,7 +85,12 @@ const Pricing = () => {
         setError(response.message || 'Failed to fetch services');
       }
     } catch (err) {
-      setError(err.message || 'Error loading services');
+      // Provide more user-friendly error messages
+      if (err.status === 500) {
+        setError('Unable to connect to the server. Please check your connection and try again.');
+      } else {
+        setError(err.message || 'Error loading services');
+      }
       console.error('Error fetching services:', err);
     } finally {
       setLoading(false);
