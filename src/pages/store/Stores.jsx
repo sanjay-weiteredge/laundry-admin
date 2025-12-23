@@ -42,6 +42,13 @@ const DeleteIcon = () => (
   </svg>
 );
 
+const ViewIcon = () => (
+  <svg width="16" height="16" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+    <path d="M1 12s4-7 11-7 11 7 11 7-4 7-11 7-11-7-11-7Z" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round"/>
+    <circle cx="12" cy="12" r="3" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round"/>
+  </svg>
+);
+
 const initialFormState = {
   name: '',
   email: '',
@@ -58,6 +65,7 @@ const Stores = () => {
   const [search, setSearch] = useState('');
   const [statusFilter, setStatusFilter] = useState('all');
   const [isModalOpen, setIsModalOpen] = useState(false);
+  const [isViewOpen, setIsViewOpen] = useState(false);
   const [formData, setFormData] = useState(initialFormState);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState('');
@@ -65,8 +73,30 @@ const Stores = () => {
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [deletingId, setDeletingId] = useState(null);
   const [editingStore, setEditingStore] = useState(null);
+  const [viewingStore, setViewingStore] = useState(null);
   const [currentPage, setCurrentPage] = useState(1);
   const itemsPerPage = 5;
+
+  const formatCurrency = (value) => {
+    try {
+      return new Intl.NumberFormat('en-IN', {
+        style: 'currency',
+        currency: 'INR',
+        maximumFractionDigits: 0,
+      }).format(Number(value || 0));
+    } catch {
+      return `₹${Number(value || 0).toLocaleString('en-IN')}`;
+    }
+  };
+
+  const formatDateTime = (value) => {
+    if (!value) return '—';
+    try {
+      return new Date(value).toLocaleString('en-IN', { dateStyle: 'medium', timeStyle: 'short' });
+    } catch {
+      return String(value);
+    }
+  };
 
   const loadStores = useCallback(async () => {
     try {
@@ -138,6 +168,16 @@ const Stores = () => {
     setEditingStore(null);
     setFormData(initialFormState);
     setFormError('');
+  };
+
+  const handleOpenView = (store) => {
+    setViewingStore(store);
+    setIsViewOpen(true);
+  };
+
+  const handleCloseView = () => {
+    setIsViewOpen(false);
+    setViewingStore(null);
   };
 
   const handleEditStore = (store) => {
@@ -260,6 +300,14 @@ const Stores = () => {
       header: 'Actions',
       render: (_, row) => (
         <div className="stores-actions">
+          <button
+            type="button"
+            className="icon-button"
+            aria-label="View store"
+            onClick={() => handleOpenView(row)}
+          >
+            <ViewIcon />
+          </button>
           <button
             type="button"
             className="icon-button"
@@ -514,6 +562,33 @@ const Stores = () => {
             </button>
           </div>
         </form>
+      </Modal>
+
+      <Modal
+        isOpen={isViewOpen}
+        onClose={handleCloseView}
+        title={'Store Details'}
+        dialogClassName="stores-modal"
+      >
+        {viewingStore ? (
+          <div className="store-view">
+            <div className="store-view__details">
+              <p><strong>Name:</strong> {viewingStore.name}</p>
+              <p><strong>Email:</strong> {viewingStore.email || '—'}</p>
+              <p><strong>Phone:</strong> {viewingStore.phone || '—'}</p>
+              <p><strong>Status:</strong> {viewingStore.is_active ? 'Active' : 'Inactive'}</p>
+              <p><strong>Created At:</strong> {formatDateTime(viewingStore.created_at)}</p>
+              <p><strong>Address:</strong> {viewingStore.address || '—'}</p>
+              <p><strong>Latitude:</strong> {viewingStore.latitude ?? '—'}</p>
+              <p><strong>Longitude:</strong> {viewingStore.longitude ?? '—'}</p>
+              <p><strong>Current Month Revenue:</strong> {formatCurrency(viewingStore?.revenue?.currentMonth)}</p>
+              <p><strong>Last 90 Days Revenue:</strong> {formatCurrency(viewingStore?.revenue?.last90Days)}</p>
+              <p><strong>Last Year Revenue:</strong> {formatCurrency(viewingStore?.revenue?.lastYear)}</p>
+            </div>
+          </div>
+        ) : (
+          <p className="small-text text-muted">No store selected.</p>
+        )}
       </Modal>
     </section>
   );
