@@ -11,6 +11,7 @@ const routeTitles = {
   '/services': 'Service Management',
   '/users': 'Users Management',
   '/profile': 'Profile ',
+  '/posters': 'Poster Management',
 };
 
 const MainLayout = () => {

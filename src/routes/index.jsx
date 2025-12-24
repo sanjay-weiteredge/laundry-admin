@@ -8,6 +8,7 @@ import Orders from '../pages/orders/Orders';
 import Pricing from '../pages/service/Service';
 import Users from '../pages/users/Users';
 import Profile from '../pages/profile/Profile';
+import Posters from '../pages/posters/Posters';
 
 const AppRouter = () => (
   <Routes>
@@ -21,6 +22,7 @@ const AppRouter = () => (
         <Route path="/services" element={<Pricing />} />
         <Route path="/users" element={<Users />} />
         <Route path="/profile" element={<Profile />} />
+        <Route path="/posters" element={<Posters />} />
         <Route path="*" element={<Navigate to="/" replace />} />
       </Route>
     </Route>

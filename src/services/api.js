@@ -32,9 +32,14 @@ const setStoredUser = (user) => {
 const apiRequest = async (endpoint, options = {}) => {
   const token = getAuthToken();
   const headers = {
-    'Content-Type': 'application/json',
     ...options.headers,
   };
+
+  // Only set JSON content-type if the body is not FormData and caller didn't set it
+  const isFormData = options && options.body && typeof FormData !== 'undefined' && options.body instanceof FormData;
+  if (!isFormData && !headers['Content-Type']) {
+    headers['Content-Type'] = 'application/json';
+  }
 
   if (token) {
     headers['Authorization'] = `Bearer ${token}`;
@@ -193,21 +198,46 @@ export const adminAPI = {
   },
 
   createService: async (payload) => {
+    const isForm = typeof FormData !== 'undefined' && payload instanceof FormData;
     return await apiRequest('/services/create', {
       method: 'POST',
-      body: JSON.stringify(payload),
+      body: isForm ? payload : JSON.stringify(payload),
     });
   },
 
   updateService: async (serviceId, payload) => {
+    const isForm = typeof FormData !== 'undefined' && payload instanceof FormData;
     return await apiRequest(`/services/update/${serviceId}`, {
       method: 'PUT',
-      body: JSON.stringify(payload),
+      body: isForm ? payload : JSON.stringify(payload),
     });
   },
 
   deleteService: async (serviceId) => {
     return await apiRequest(`/services/delete/${serviceId}`, {
+      method: 'DELETE',
+    });
+  },
+
+  // Posters
+  createPoster: async (file) => {
+    const formData = new FormData();
+    // Backend expects the multer field name 'poster'
+    formData.append('poster', file);
+    return await apiRequest('/admin/posters', {
+      method: 'POST',
+      body: formData,
+    });
+  },
+
+  getPosters: async () => {
+    return await apiRequest('/admin/posters', {
+      method: 'GET',
+    });
+  },
+
+  deletePoster: async (id) => {
+    return await apiRequest(`/admin/posters/${id}`, {
       method: 'DELETE',
     });
   },

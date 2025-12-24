@@ -69,6 +69,7 @@ const Pricing = () => {
     vendor: false,
     user: false,
   });
+  const [imageFile, setImageFile] = useState(null);
 
   useEffect(() => {
     fetchServices();
@@ -116,6 +117,7 @@ const Pricing = () => {
         vendor: Boolean(service.vendor),
         user: Boolean(service.user),
       });
+      setImageFile(null);
     } else {
       setEditingService(null);
       setFormData({
@@ -126,6 +128,7 @@ const Pricing = () => {
         vendor: false,
         user: false,
       });
+      setImageFile(null);
     }
     setIsModalOpen(true);
   };
@@ -160,8 +163,22 @@ const Pricing = () => {
       };
       
       let response;
+      const shouldUseFormData = !editingService || !!imageFile;
       if (editingService && editingService.id) {
-        response = await adminAPI.updateService(editingService.id, submitData);
+        if (shouldUseFormData) {
+          const fd = new FormData();
+          fd.append('name', formData.name);
+          fd.append('description', formData.description);
+          fd.append('price', String(formData.price));
+          fd.append('vendor', formData.vendor ? 'true' : 'false');
+          fd.append('user', formData.user ? 'true' : 'false');
+          if (imageFile) {
+            fd.append('image', imageFile);
+          }
+          response = await adminAPI.updateService(editingService.id, fd);
+        } else {
+          response = await adminAPI.updateService(editingService.id, submitData);
+        }
         if (response.success) {
           handleCloseModal();
           fetchServices(); 
@@ -171,7 +188,19 @@ const Pricing = () => {
           showErrorAlert('Unable to update service', response.message || 'Please try again.');
         }
       } else {
-        response = await adminAPI.createService(submitData);
+        if (!imageFile) {
+          setError('Please select an image file to upload.');
+          showErrorAlert('Image required', 'Please choose an image file for this service.');
+          return;
+        }
+        const fd = new FormData();
+        fd.append('name', formData.name);
+        fd.append('description', formData.description);
+        fd.append('price', String(formData.price));
+        fd.append('vendor', formData.vendor ? 'true' : 'false');
+        fd.append('user', formData.user ? 'true' : 'false');
+        fd.append('image', imageFile);
+        response = await adminAPI.createService(fd);
         if (response.success) {
           handleCloseModal();
           setCurrentPage(1); 
@@ -464,17 +493,16 @@ const Pricing = () => {
           </div>
           <div className="modal-form__field">
             <label className="modal-form__label" htmlFor="serviceImage">
-              Image URL <span className="required">*</span>
+              Image <span className="required">{editingService ? '' : '*'}</span>
             </label>
             <input
-              type="url"
+              type="file"
               id="serviceImage"
               name="image"
-              value={formData.image}
-              onChange={handleInputChange}
+              accept="image/*"
+              onChange={(e) => setImageFile(e.target.files && e.target.files[0] ? e.target.files[0] : null)}
               className="modal-form__input"
-              placeholder="https://example.com/image.jpg"
-              required
+              required={!editingService}
               disabled={submitting}
             />
           </div>

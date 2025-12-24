@@ -73,6 +73,7 @@ const navItems = [
   { label: 'Order Management', path: '/orders', icon: OrdersIcon },
   { label: 'Service Management', path: '/services', icon: PricingIcon },
   { label: 'User Management', path: '/users', icon: UsersIcon },
+  { label: 'Poster Management', path: '/posters', icon: PricingIcon },
 ];
 
 const Sidebar = () => {
