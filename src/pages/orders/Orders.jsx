@@ -165,7 +165,22 @@ const Orders = () => {
     setCurrentPage(newPage);
   };
 
-  const formatDate = (value) => (value ? new Date(value).toLocaleString() : '—');
+  const formatDate = (value, options) => {
+    if (!value) return '—';
+    return new Date(value).toLocaleString('en-IN', {
+      dateStyle: 'medium',
+      timeStyle: 'short',
+      ...options,
+    });
+  };
+
+  const formatCurrency = (value) => {
+    const amount = Number(value) || 0;
+    return `₹${amount.toLocaleString('en-IN', {
+      minimumFractionDigits: 2,
+      maximumFractionDigits: 2,
+    })}`;
+  };
 
   const handleViewOrder = (row) => {
     setSelectedOrder(row.raw || row);
@@ -325,12 +340,63 @@ const Orders = () => {
                 selectedOrder.status ||
                 'Unknown'}
             </p>
-            <p>
+            {/* <p>
               <strong>Created At:</strong> {formatDate(selectedOrder.created_at)}
+            </p> */}
+            {(() => {
+              let pickupContent;
+              if (selectedOrder.is_walk_in) {
+                pickupContent = (
+                  <p>
+                    <strong>Pickup:</strong> {formatDate(selectedOrder.created_at)}
+                  </p>
+                );
+              } else {
+                const start = selectedOrder.pickup_scheduled_at ? new Date(selectedOrder.pickup_scheduled_at) : null;
+                const end = selectedOrder.pickup_slot_end ? new Date(selectedOrder.pickup_slot_end) : null;
+                let slot = 'Not Scheduled';
+
+                if (start && end) {
+                  const startStr = formatDate(start);
+                  if (start.toDateString() === end.toDateString()) {
+                    slot = `${startStr} - ${end.toLocaleTimeString('en-IN', { timeStyle: 'short' })}`;
+                  } else {
+                    slot = `${startStr} - ${formatDate(end)}`;
+                  }
+                } else if (start) {
+                  slot = formatDate(start);
+                }
+
+                pickupContent = (
+                  <p>
+                    <strong>Pickup:</strong> {slot}
+                  </p>
+                );
+              }
+              return pickupContent;
+            })()}
+            <p>
+              <strong>Express Order:</strong> {selectedOrder.is_express ? 'Yes' : 'No'}
             </p>
             <p>
-              <strong>Pickup Scheduled:</strong> {formatDate(selectedOrder.pickup_scheduled_at)}
+              <strong>Walk-In Order:</strong> {selectedOrder.is_walk_in ? 'Yes' : 'No'}
             </p>
+            {selectedOrder.order_status === 'delivered' && selectedOrder.delivered_at && (
+              <p>
+                <strong>Delivered At:</strong> {formatDate(selectedOrder.delivered_at)}
+              </p>
+            )}
+            {(() => {
+              const totalAmount = selectedOrder.items?.reduce((sum, item) => sum + parseFloat(item.total_amount || 0), 0);
+              if (totalAmount > 0) {
+                return (
+                  <p>
+                    <strong>Total Amount:</strong> {formatCurrency(totalAmount)}
+                  </p>
+                );
+              }
+              return null;
+            })()}
           </div>
         )}
       </Modal>
