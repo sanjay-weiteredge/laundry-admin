@@ -75,6 +75,8 @@ const Stores = () => {
   const [editingStore, setEditingStore] = useState(null);
   const [viewingStore, setViewingStore] = useState(null);
   const [currentPage, setCurrentPage] = useState(1);
+  const [nearbyRadius, setNearbyRadius] = useState(3);
+  const [loadingRadius, setLoadingRadius] = useState(false);
   const itemsPerPage = 5;
 
   const formatCurrency = (value) => {
@@ -112,9 +114,24 @@ const Stores = () => {
     }
   }, []);
 
+  const loadNearbyRadius = useCallback(async () => {
+    try {
+      setLoadingRadius(true);
+      const response = await adminAPI.getNearbyRadius();
+      if (response.success && response.data) {
+        setNearbyRadius(response.data.radius_km || 3);
+      }
+    } catch (err) {
+      console.error('Failed to load nearby radius:', err);
+    } finally {
+      setLoadingRadius(false);
+    }
+  }, []);
+
   useEffect(() => {
     loadStores();
-  }, [loadStores]);
+    loadNearbyRadius();
+  }, [loadStores, loadNearbyRadius]);
 
   const filteredStores = useMemo(() => {
     const term = search.trim().toLowerCase();
@@ -273,6 +290,19 @@ const Stores = () => {
     }
   };
 
+  const handleNearbyRadiusChange = async (newRadius) => {
+    try {
+      setLoadingRadius(true);
+      await adminAPI.updateNearbyRadius(newRadius);
+      setNearbyRadius(newRadius);
+      showSuccessAlert('Radius updated', `Nearby radius set to ${newRadius} km`);
+    } catch (err) {
+      showErrorAlert('Update failed', err.message || 'Unable to update nearby radius.');
+    } finally {
+      setLoadingRadius(false);
+    }
+  };
+
   const columns = [
     { key: 'id', header: 'Store ID', field: 'id' },
     { key: 'name', header: 'Store Name', field: 'name' },
@@ -333,8 +363,29 @@ const Stores = () => {
   return (
     <section className="stores-page">
       <header className="stores-page__header">
-        <div>
-          <p className="text-muted">Monitor each location's availability and contact details.</p>
+        <div className="stores-page__header-left">
+          <div>
+            <p className="text-muted">Monitor each location's availability and contact details.</p>
+          </div>
+          <div className="stores-page__header-controls">
+            <label htmlFor="nearby-radius" className="filter-label">
+              Nearby Radius (km):
+            </label>
+            <select
+              id="nearby-radius"
+              value={nearbyRadius}
+              onChange={(event) => handleNearbyRadiusChange(Number(event.target.value))}
+              disabled={loadingRadius}
+              aria-label="Set nearby radius"
+            >
+              {[1, 2, 3, 4, 5, 6, 7, 8, 9, 10].map((num) => (
+                <option key={num} value={num}>
+                  {num} km
+                </option>
+              ))}
+            </select>
+            {loadingRadius && <span className="loading-spinner">Updating...</span>}
+          </div>
         </div>
         {!loading && stores.length > 0 && (
           <button type="button" className="primary-btn" onClick={handleOpenModal}>

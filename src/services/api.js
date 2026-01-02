@@ -242,6 +242,32 @@ export const adminAPI = {
     });
   },
 
+  getSetting: async (key) => {
+    return await apiRequest(`/settings/${key}`, {
+      method: 'GET',
+    });
+  },
+
+  updateSetting: async (key, payload) => {
+    return await apiRequest(`/settings/${key}`, {
+      method: 'PUT',
+      body: JSON.stringify(payload),
+    });
+  },
+
+  getNearbyRadius: async () => {
+    return await apiRequest('/settings/nearby/radius', {
+      method: 'GET',
+    });
+  },
+
+  updateNearbyRadius: async (value) => {
+    return await apiRequest('/settings/nearby/radius', {
+      method: 'PUT',
+      body: JSON.stringify({ value }),
+    });
+  }, 
+
   logout: () => {
     setAuthToken(null);
     setStoredUser(null);
